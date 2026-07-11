@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <!-- MongoDB official .NET driver -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.*" />
     <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
 
     <!-- Cloudinary SDK for digital signature image storage -->
@@ -20,6 +21,7 @@
 
     <!-- Swagger/OpenAPI UI for testing all endpoints -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
   </ItemGroup>
 
 </Project>

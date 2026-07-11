@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getToken, clearAuth } from './utils/auth';
 
 // Set up Axios client with base URL pointing to Render deployed backend
 const api = axios.create({
@@ -7,6 +8,18 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Request interceptor to automatically attach JWT token
+api.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Response interceptor to automatically extract response wrapper
 api.interceptors.response.use(
@@ -22,6 +35,14 @@ api.interceptors.response.use(
     return { success: true, data: response.data, message: null };
   },
   (error) => {
+    // Handle authentication expiration
+    if (error.response && error.response.status === 401) {
+      clearAuth();
+      // Only redirect if not already on the login page
+      if (!window.location.pathname.endsWith('/login')) {
+        window.location.href = '/login';
+      }
+    }
     const message = error.response?.data?.message || error.message || 'API request failed';
     return Promise.reject(new Error(message));
   }

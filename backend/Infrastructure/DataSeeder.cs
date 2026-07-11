@@ -24,6 +24,31 @@ public static class DataSeeder
 
         await SeedSettingsAsync(db, logger);
         await SeedCategoriesAsync(db, logger);
+        await SeedUsersAsync(db, logger);
+    }
+
+    private static async Task SeedUsersAsync(MongoDbContext db, ILogger logger)
+    {
+        var count = await db.Users.CountDocumentsAsync(_ => true);
+        if (count > 0)
+        {
+            return;
+        }
+
+        var admin = new User
+        {
+            Username = "admin",
+            FullName = "System Administrator",
+            Role = "Admin",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+        admin.PasswordHash = hasher.HashPassword(admin, "Admin@123");
+
+        await db.Users.InsertOneAsync(admin);
+        logger.LogInformation("Default administrator user seeded successfully (username: admin, password: Admin@123)");
     }
 
     // ─── Settings Seed ────────────────────────────────────────────────────────

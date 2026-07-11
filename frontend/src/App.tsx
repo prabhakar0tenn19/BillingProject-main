@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Button, Space, Typography } from 'antd';
+import { Layout, Button, Space, Typography, message } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
-  PlusCircleOutlined,
   TeamOutlined,
   ShoppingOutlined,
-  AppstoreOutlined,
-  BarChartOutlined,
   SettingOutlined,
   ClockCircleOutlined,
-  PlusOutlined
+  PlusOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -25,6 +23,10 @@ import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
+
+// Auth utilities
+import { isAuthenticated, getUser, clearAuth } from './utils/auth';
 
 const { Content } = Layout;
 const { Text } = Typography;
@@ -34,6 +36,8 @@ const App: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const authenticated = isAuthenticated();
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(dayjs().format('DD MMM YYYY, hh:mm:ss A'));
@@ -41,11 +45,34 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Redirect to login if unauthenticated and not on the login page
+  useEffect(() => {
+    if (!authenticated && location.pathname !== '/login') {
+      navigate('/login');
+    }
+  }, [authenticated, location.pathname, navigate]);
+
+  const handleLogout = () => {
+    clearAuth();
+    message.success('Logged out successfully');
+    navigate('/login');
+  };
+
   const isActive = (path: string) => {
     if (path === '/' && location.pathname === '/') return true;
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
   };
+
+  // If path is /login, render Login component raw without application layout
+  if (location.pathname === '/login') {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Login />} />
+      </Routes>
+    );
+  }
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#faf9f6' }}>
@@ -85,7 +112,7 @@ const App: React.FC = () => {
           </Link>
         </nav>
 
-        {/* Desktop actions: Clock & Create Order */}
+        {/* Desktop actions: Clock, Create Order & Logout */}
         <Space size="large" className="desktop-actions-only">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ClockCircleOutlined style={{ color: '#858076' }} />
@@ -101,16 +128,44 @@ const App: React.FC = () => {
           >
             Create Order
           </Button>
+
+          {/* User profile & Sign Out */}
+          {authenticated && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderLeft: '1px solid #e2e8f0', paddingLeft: '16px' }}>
+              <Text strong style={{ color: '#1e293b', fontSize: 13 }}>
+                {getUser()?.fullName.split(' ')[0]}
+              </Text>
+              <Button
+                type="text"
+                danger
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                title="Log Out"
+              />
+            </div>
+          )}
         </Space>
 
-        {/* Mobile Header action: Simple circular plus button */}
-        <Button
-          type="primary"
-          shape="circle"
-          icon={<PlusOutlined />}
-          onClick={() => navigate('/new-bill')}
-          className="mobile-action-only"
-        />
+        {/* Mobile Header action: plus and logout buttons */}
+        {authenticated && (
+          <Space className="mobile-action-only" size="middle">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/new-bill')}
+            />
+            <Button
+              type="default"
+              shape="circle"
+              danger
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            />
+          </Space>
+        )}
       </header>
 
       {/* Main Content Area */}
@@ -127,6 +182,7 @@ const App: React.FC = () => {
             <Route path="/categories" element={<Categories />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<Dashboard />} />
           </Routes>
         </div>
         <Layout.Footer className="no-print" style={{ textAlign: 'center', color: '#858076', padding: '24px 24px 80px', background: '#faf9f6', borderTop: '1px solid #f1ebd9' }}>

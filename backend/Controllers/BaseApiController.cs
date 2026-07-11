@@ -1,4 +1,5 @@
 using BillingSystem.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BillingSystem.Controllers;
@@ -16,6 +17,7 @@ namespace BillingSystem.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize]
 public abstract class BaseApiController : ControllerBase
 {
     protected IActionResult OkResponse<T>(T data, string? message = null)

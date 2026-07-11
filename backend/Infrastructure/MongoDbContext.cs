@@ -64,6 +64,9 @@ public class MongoDbContext
     public IMongoCollection<Invoice> Invoices
         => _database.GetCollection<Invoice>("invoices");
 
+    public IMongoCollection<User> Users
+        => _database.GetCollection<User>("users");
+
     // ─── Index Creation ───────────────────────────────────────────────────────
 
     /// <summary>
@@ -74,6 +77,18 @@ public class MongoDbContext
     {
         try
         {
+            // users: unique index on username
+            var userIndexKeys = Builders<User>.IndexKeys.Ascending(x => x.Username);
+            Users.Indexes.CreateOne(
+                new CreateIndexModel<User>(
+                    userIndexKeys,
+                    new CreateIndexOptions
+                    {
+                        Unique = true,
+                        Name = "user_username_unique",
+                        Background = true
+                    }));
+
             // customer_pricing: unique compound index on (customerId, productId)
             // Enforces: only ONE price override per product per customer
             var pricingIndexKeys = Builders<CustomerPricing>.IndexKeys
