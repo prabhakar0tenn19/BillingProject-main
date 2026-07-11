@@ -518,7 +518,7 @@ const NewBill: React.FC = () => {
       {currentStep === 2 && (
         <Card title="Step 3: Review Invoice Details" style={{ borderRadius: 10 }}>
           <Form form={metaForm} layout="vertical">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="wizard-grid-2col">
               <Form.Item
                 name="invoiceDate"
                 label="Invoice Date"
@@ -540,7 +540,7 @@ const NewBill: React.FC = () => {
 
           <div style={{ background: '#f8fafc', padding: 16, borderRadius: 8, marginBottom: 24 }}>
             <Title level={5} style={{ margin: 0, marginBottom: 8 }}>Invoicing Summary</Title>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div className="wizard-grid-2col" style={{ gap: '8px' }}>
               <div><Text type="secondary">Customer Items: </Text> <Text strong>{selectedItems.length} products</Text></div>
               <div><Text type="secondary">Net Amount: </Text> <Text strong>₹{subTotalSum.toFixed(2)}</Text></div>
               <div><Text type="secondary">GST Amount: </Text> <Text strong>₹{gstSum.toFixed(2)}</Text></div>
@@ -548,7 +548,7 @@ const NewBill: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="wizard-flex-actions">
             <Button size="large" onClick={prevStep}>
               Back: Edit Items
             </Button>

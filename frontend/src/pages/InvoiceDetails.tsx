@@ -263,7 +263,7 @@ const InvoiceDetails: React.FC = () => {
       <Card className="print-invoice-container" style={{ borderRadius: 10, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', padding: '16px' }}>
         
         {/* Invoice Header Details */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
+        <div className="invoice-header-row">
           <div>
             <Title level={3} style={{ margin: 0, color: '#1e293b' }}>TAX INVOICE</Title>
             <Text type="secondary">GST-compliant Manufacturer Invoice</Text>
@@ -280,7 +280,7 @@ const InvoiceDetails: React.FC = () => {
         </div>
 
         {/* Addresses Box */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: 32 }}>
+        <div className="invoice-addresses-grid">
           {/* Supplier details (Company snapshot) */}
           <div style={{ background: '#f8fafc', padding: 16, borderRadius: 8 }}>
             <Text type="secondary" strong style={{ display: 'block', marginBottom: 8 }}>FROM (SUPPLIER)</Text>
@@ -324,19 +324,20 @@ const InvoiceDetails: React.FC = () => {
           columns={columns}
           rowKey="productId"
           pagination={false}
+          scroll={{ x: 'max-content' }}
           size="middle"
           bordered
           style={{ marginBottom: 32 }}
         />
 
         {/* Totals, Bank details and Digital Signature */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '32px' }}>
+        <div className="invoice-totals-row">
           {/* Left panel: Bank Details and Total in Words */}
           <div>
             {invoice.companySnapshot.bankName && (
               <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
                 <Text strong style={{ display: 'block', marginBottom: 4 }}>BANK PAYMENT DETAILS</Text>
-                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr' }}>
+                <div className="invoice-bank-grid">
                   <Text type="secondary">Bank Name: </Text> <Text strong>{invoice.companySnapshot.bankName}</Text>
                   <Text type="secondary">Account No: </Text> <Text strong>{invoice.companySnapshot.bankAccount}</Text>
                   <Text type="secondary">IFSC Code: </Text> <Text strong>{invoice.companySnapshot.bankIfsc}</Text>
@@ -360,7 +361,7 @@ const InvoiceDetails: React.FC = () => {
 
           {/* Right panel: Calculations summary & signature */}
           <div style={{ textAlign: 'right' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '8px', marginBottom: 24 }}>
+            <div className="invoice-calc-grid">
               <Text type="secondary">Taxable SubTotal: </Text>
               <Text strong>₹{invoice.subTotal.toFixed(2)}</Text>
               
