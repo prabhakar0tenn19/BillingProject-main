@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, Space, Typography } from 'antd';
+import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Layout, Button, Space, Typography } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -11,6 +11,7 @@ import {
   BarChartOutlined,
   SettingOutlined,
   ClockCircleOutlined,
+  PlusOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -25,13 +26,13 @@ import Categories from './pages/Categories';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 
-const { Header, Content, Sider } = Layout;
+const { Content } = Layout;
 const { Text } = Typography;
 
 const App: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(dayjs().format('DD MMM YYYY, hh:mm:ss A'));
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,126 +41,88 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const menuItems = [
-    {
-      key: '/',
-      icon: <DashboardOutlined />,
-      label: <Link to="/">Dashboard</Link>,
-    },
-    {
-      key: '/invoices',
-      icon: <FileTextOutlined />,
-      label: <Link to="/invoices">Invoices</Link>,
-    },
-    {
-      key: '/new-bill',
-      icon: <PlusCircleOutlined />,
-      label: <Link to="/new-bill">New Bill</Link>,
-    },
-    {
-      key: '/parties',
-      icon: <TeamOutlined />,
-      label: <Link to="/parties">Parties (Customers)</Link>,
-    },
-    {
-      key: '/products',
-      icon: <ShoppingOutlined />,
-      label: <Link to="/products">Product Catalog</Link>,
-    },
-    {
-      key: '/categories',
-      icon: <AppstoreOutlined />,
-      label: <Link to="/categories">Categories</Link>,
-    },
-    {
-      key: '/reports',
-      icon: <BarChartOutlined />,
-      label: <Link to="/reports">Reports</Link>,
-    },
-    {
-      key: '/settings',
-      icon: <SettingOutlined />,
-      label: <Link to="/settings">Company Settings</Link>,
-    },
-  ];
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
-        theme="dark"
-        width={250}
-        className="no-print"
-      >
-        <div className="brand-section">
-          <h2 className="brand-title">{collapsed ? 'BS' : 'Sanitaryware Billing'}</h2>
-          {!collapsed && <p className="brand-subtitle">Company Admin Panel</p>}
+    <Layout style={{ minHeight: '100vh', background: '#faf9f6' }}>
+      {/* AQUA Top Navigation Header */}
+      <header className="header-nav no-print">
+        <div className="logo-container" onClick={() => navigate('/')}>
+          {/* Gold building/water drop icon */}
+          <span style={{ fontSize: '24px', color: '#855b14', display: 'flex', alignItems: 'center' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+            </svg>
+          </span>
+          <span className="logo-text">AQUA</span>
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          style={{ borderRight: 0, marginTop: 16 }}
-        />
-      </Sider>
-      <Layout>
-        <Header
-          className="no-print"
-          style={{
-            background: '#ffffff',
-            padding: '0 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid #f0f0f0',
-            height: 64,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Typography.Title level={4} style={{ margin: 0, fontWeight: 600 }}>
-              {menuItems.find((item) => item.key === location.pathname)?.label?.props.children ||
-                (location.pathname.startsWith('/invoices/') ? 'Invoice Detail' : 'Billing System')}
-            </Typography.Title>
-          </div>
-          <Space size="middle">
-            <ClockCircleOutlined style={{ color: '#8c8c8c' }} />
-            <Text type="secondary" strong>
+
+        <nav className="nav-links">
+          <Link to="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}>
+            Dashboard
+          </Link>
+          <Link to="/products" className={`nav-item ${isActive('/products') ? 'active' : ''}`}>
+            Catalog
+          </Link>
+          <Link to="/invoices" className={`nav-item ${isActive('/invoices') ? 'active' : ''}`}>
+            Invoices
+          </Link>
+          <Link to="/parties" className={`nav-item ${isActive('/parties') ? 'active' : ''}`}>
+            Buyers
+          </Link>
+          <Link to="/categories" className={`nav-item ${isActive('/categories') ? 'active' : ''}`}>
+            Categories
+          </Link>
+          <Link to="/reports" className={`nav-item ${isActive('/reports') ? 'active' : ''}`}>
+            Reports
+          </Link>
+          <Link to="/settings" className={`nav-item ${isActive('/settings') ? 'active' : ''}`}>
+            Settings
+          </Link>
+        </nav>
+
+        <Space size="large">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ClockCircleOutlined style={{ color: '#858076' }} />
+            <Text type="secondary" style={{ fontSize: 13, fontWeight: 500 }}>
               {currentTime}
             </Text>
-          </Space>
-        </Header>
-        <Content style={{ margin: '24px 24px 0', overflow: 'initial', display: 'flex', flexDirection: 'column' }}>
-          <div
-            style={{
-              padding: 24,
-              background: '#ffffff',
-              borderRadius: 10,
-              minHeight: 360,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              flex: 1,
-            }}
-          >
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/invoices/:id" element={<InvoiceDetails />} />
-              <Route path="/new-bill" element={<NewBill />} />
-              <Route path="/edit-invoice/:id" element={<NewBill />} />
-              <Route path="/parties" element={<Customers />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
           </div>
-          <Layout.Footer className="no-print" style={{ textAlign: 'center', color: '#8c8c8c', padding: '16px 24px' }}>
-            Sanitaryware Manufacturing Billing System &copy; {dayjs().format('YYYY')} — Secure GST B2B Ledger
-          </Layout.Footer>
-        </Content>
-      </Layout>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => navigate('/new-bill')}
+            style={{ height: '40px', padding: '0 20px' }}
+          >
+            Create Order
+          </Button>
+        </Space>
+      </header>
+
+      {/* Main Content Area */}
+      <Content style={{ minHeight: 'calc(100vh - 72px)', display: 'flex', flexDirection: 'column' }}>
+        <div className="page-container" style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/invoices/:id" element={<InvoiceDetails />} />
+            <Route path="/new-bill" element={<NewBill />} />
+            <Route path="/edit-invoice/:id" element={<NewBill />} />
+            <Route path="/parties" element={<Customers />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </div>
+        <Layout.Footer className="no-print" style={{ textAlign: 'center', color: '#858076', padding: '24px 24px', background: '#faf9f6', borderTop: '1px solid #f1ebd9' }}>
+          AQUA Sanitaryware Manufacturing &copy; {dayjs().format('YYYY')} — Secure GST B2B Ledger
+        </Layout.Footer>
+      </Content>
     </Layout>
   );
 };

@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Table, Button, Modal, Form, Input, InputNumber, Select, Space,
-  Alert, Typography, message, Popconfirm, Upload, Tag, Badge, Image
+  Button, Modal, Form, Input, InputNumber, Select, Space,
+  Alert, Typography, message, Popconfirm, Upload, Tag, Spin
 } from 'antd';
 import {
-  PlusOutlined, EditOutlined, DeleteOutlined, InboxOutlined,
+  PlusOutlined, EditOutlined, DeleteOutlined,
   UploadOutlined, LoadingOutlined, FileImageOutlined
 } from '@ant-design/icons';
 import api from '../api';
-import dayjs from 'dayjs';
 
 const { Title, Paragraph, Text } = Typography;
-const { Option } = Select;
 
 interface Product {
   id: string;
@@ -25,6 +23,7 @@ interface Product {
   isActive: boolean;
   imageUrl?: string;
   imagePublicId?: string;
+  basePrice?: number; // mapped dynamically in frontend from generic catalog
 }
 
 interface Category {
@@ -35,25 +34,48 @@ interface Category {
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [stockProduct, setStockProduct] = useState<Product | null>(null);
   const [imageLoadingMap, setImageLoadingMap] = useState<Record<string, boolean>>({});
   
   const [form] = Form.useForm();
-  const [stockForm] = Form.useForm();
 
+  // Load products AND resolve base prices using first customer's catalog
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // 1. Fetch raw products
       const res = await api.get('/products');
-      if (res.success) {
-        setProducts(res.data);
+      if (!res.success) return;
+      const productsData = res.data;
+
+      // 2. Fetch customers to resolve base prices (via generic customer catalog)
+      const custRes = await api.get('/customers');
+      let priceMap: Record<string, number> = {};
+      
+      if (custRes.success && custRes.data.length > 0) {
+        const firstCustId = custRes.data[0].id;
+        const catalogRes = await api.get(`/customers/${firstCustId}/pricing/bill-ready`);
+        if (catalogRes.success) {
+          catalogRes.data.forEach((p: any) => {
+            priceMap[p.productId] = p.effectivePrice;
+          });
+        }
       }
+
+      // Merge resolved base price into products state
+      const mergedProducts = productsData.map((p: any) => ({
+        ...p,
+        basePrice: priceMap[p.id] || 0.00
+      }));
+
+      setProducts(mergedProducts);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch product catalog');
     } finally {
@@ -66,6 +88,9 @@ const Products: React.FC = () => {
       const res = await api.get('/categories');
       if (res.success) {
         setCategories(res.data);
+        if (res.data.length > 0 && !selectedCategoryId) {
+          setSelectedCategoryId(res.data[0].id); // default to first category
+        }
       }
     } catch (err) {
       console.error('Failed to load categories', err);
@@ -91,15 +116,9 @@ const Products: React.FC = () => {
       categoryId: product.categoryId,
       description: product.description,
       stock: product.stock,
-      basePrice: 100.0, // Default placeholder since basePrice is hidden in public views
+      basePrice: product.basePrice || 0.00,
     });
     setIsModalOpen(true);
-  };
-
-  const openStockModal = (product: Product) => {
-    setStockProduct(product);
-    stockForm.resetFields();
-    setIsStockModalOpen(true);
   };
 
   const handleModalSubmit = async () => {
@@ -130,26 +149,11 @@ const Products: React.FC = () => {
     }
   };
 
-  const handleStockSubmit = async () => {
-    try {
-      if (!stockProduct) return;
-      const values = await stockForm.validateFields();
-      const res = await api.patch(`/products/${stockProduct.id}/stock`, values);
-      if (res.success) {
-        message.success('Stock level updated successfully');
-        fetchProducts();
-        setIsStockModalOpen(false);
-      }
-    } catch (err: any) {
-      message.error(err.message || 'Failed to update stock');
-    }
-  };
-
   const handleDelete = async (id: string) => {
     try {
       const res = await api.delete(`/products/${id}`);
       if (res.success) {
-        message.success('Product soft deleted');
+        message.success('Product removed successfully');
         fetchProducts();
       }
     } catch (err: any) {
@@ -192,154 +196,205 @@ const Products: React.FC = () => {
     }
   };
 
-  const columns = [
-    {
-      title: 'Image',
-      dataIndex: 'imageUrl',
-      key: 'image',
-      width: 80,
-      render: (url: string, record: Product) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {url ? (
-            <Image
-              src={url}
-              alt={record.name}
-              width={50}
-              height={50}
-              style={{ objectFit: 'cover', borderRadius: '4px' }}
-            />
-          ) : (
-            <div style={{ width: 50, height: 50, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', border: '1px dashed #cbd5e1' }}>
-              <FileImageOutlined style={{ color: '#94a3b8', fontSize: '20px' }} />
-            </div>
-          )}
-          
-          <Upload
-            accept="image/*"
-            showUploadList={false}
-            beforeUpload={(file) => {
-              handleImageUpload(record.id, file);
-              return false;
-            }}
-          >
-            <Button
-              type="link"
-              size="small"
-              icon={imageLoadingMap[record.id] ? <LoadingOutlined /> : <UploadOutlined />}
-              style={{ fontSize: '10px', height: 'auto', padding: '4px 0 0 0' }}
-            >
-              {url ? 'Change' : 'Upload'}
-            </Button>
-          </Upload>
-          {url && (
-            <Button
-              type="link"
-              danger
-              size="small"
-              onClick={() => handleImageDelete(record.id)}
-              style={{ fontSize: '10px', height: 'auto', padding: 0 }}
-            >
-              Remove
-            </Button>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: 'Product Details',
-      key: 'details',
-      render: (record: Product) => (
-        <div>
-          <Typography.Text strong style={{ fontSize: '15px' }}>{record.name}</Typography.Text>
-          <div style={{ marginTop: 2 }}>
-            <Tag color="blue">Model: {record.modelNumber}</Tag>
-            <Tag color="cyan">HSN: {record.hsnCode}</Tag>
-          </div>
-          {record.description && (
-            <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginTop: 4 }}>
-              {record.description}
-            </Text>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: 'Category',
-      dataIndex: 'categoryName',
-      key: 'categoryName',
-      render: (text: string) => <Tag color="geekblue">{text}</Tag>,
-    },
-    {
-      title: 'Stock Status',
-      dataIndex: 'stock',
-      key: 'stock',
-      render: (stock: number, record: Product) => (
-        <Space direction="vertical" size={2}>
-          <Badge
-            status={stock <= 5 ? 'error' : 'success'}
-            text={`${stock} units in stock`}
-          />
-          <Button size="small" type="dashed" onClick={() => openStockModal(record)}>
-            Adjust Stock
-          </Button>
-        </Space>
-      ),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (record: Product) => (
-        <Space size="middle">
-          <Button icon={<EditOutlined />} onClick={() => openEditModal(record)}>
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure to delete this product?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
+  // ─── Adjusters (Plus/Minus Widgets) ──────────────────────────────────────────
+
+  const handleAdjustPrice = async (product: Product, delta: number) => {
+    const newPrice = Math.max(0.01, (product.basePrice || 0) + delta);
+    try {
+      const res = await api.put(`/products/${product.id}`, {
+        name: product.name,
+        modelNumber: product.modelNumber,
+        categoryId: product.categoryId,
+        description: product.description,
+        stock: product.stock,
+        isActive: product.isActive,
+        imageUrl: product.imageUrl,
+        imagePublicId: product.imagePublicId,
+        basePrice: newPrice
+      });
+      if (res.success) {
+        message.success(`Price updated to ₹${newPrice.toFixed(2)}`);
+        fetchProducts();
+      }
+    } catch (err: any) {
+      message.error(err.message || 'Failed to adjust price');
+    }
+  };
+
+  const handleAdjustStock = async (product: Product, delta: number) => {
+    // Prevent stock from going negative
+    if (product.stock + delta < 0) {
+      message.warning('Stock level cannot be negative!');
+      return;
+    }
+    try {
+      const res = await api.patch(`/products/${product.id}/stock`, {
+        quantity: delta,
+        operation: 'add'
+      });
+      if (res.success) {
+        message.success(`Stock level adjusted`);
+        fetchProducts();
+      }
+    } catch (err: any) {
+      message.error(err.message || 'Failed to adjust stock');
+    }
+  };
+
+  // Filter products by selected category
+  const filteredProducts = products.filter(p => p.categoryId === selectedCategoryId && p.isActive);
+  const activeCategoryName = categories.find(c => c.id === selectedCategoryId)?.name || 'Products';
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: 20 }}>
-        <div style={{ flex: 1 }}>
-          <Title level={3} style={{ margin: 0 }}>Product Catalog (Master DB)</Title>
-          <Paragraph type="secondary" style={{ margin: 0 }}>
-            Master list of company inventory items. Base price is kept internal and falls back to customer invoices if no specific catalog override exists.
-          </Paragraph>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal} size="large">
-          Create Product
-        </Button>
+      {error && <Alert message="Error" description={error} type="error" showIcon style={{ marginBottom: 24 }} />}
+
+      <div className="catalog-layout">
+        {/* Left Column: Categories Sidebar */}
+        <aside className="category-sidebar">
+          <h4 className="sidebar-title">Categories</h4>
+          {categories.map(cat => (
+            <div
+              key={cat.id}
+              className={`category-menu-item ${selectedCategoryId === cat.id ? 'active' : ''}`}
+              onClick={() => setSelectedCategoryId(cat.id)}
+            >
+              <span>{cat.name}</span>
+            </div>
+          ))}
+        </aside>
+
+        {/* Right Column: Main Products Catalog */}
+        <main>
+          {/* Main Title Section */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '38px', lineHeight: 1 }}>{activeCategoryName}</h1>
+              <Text style={{ color: '#855b14', fontWeight: 600, fontSize: '14px', marginTop: 8, display: 'block' }}>
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} cataloged
+              </Text>
+            </div>
+            
+            <Space>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={openCreateModal}
+                size="large"
+                style={{ background: '#855b14', borderColor: '#855b14' }}
+              >
+                Add Product
+              </Button>
+            </Space>
+          </div>
+
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px' }}>
+              <Spin size="large" tip="Loading catalog products..." />
+            </div>
+          ) : (
+            <>
+              {filteredProducts.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 0', background: '#ffffff', borderRadius: 20, border: '1px solid #f1ebd9' }}>
+                  <FileImageOutlined style={{ fontSize: 48, color: '#c2bcae', marginBottom: 16 }} />
+                  <p style={{ color: '#858076', fontSize: 15 }}>No products registered in this category yet.</p>
+                </div>
+              ) : (
+                <div className="product-grid">
+                  {filteredProducts.map(prod => {
+                    // Decide stock color indicator
+                    let stockColor = '#10b981'; // green
+                    if (prod.stock === 0) stockColor = '#ef4444'; // red
+                    else if (prod.stock <= 5) stockColor = '#f59e0b'; // orange
+
+                    return (
+                      <div className="luxury-product-card" key={prod.id}>
+                        {/* Image crop circle */}
+                        <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto 16px' }}>
+                          {prod.imageUrl ? (
+                            <img
+                              src={prod.imageUrl}
+                              alt={prod.name}
+                              className="product-circle-img"
+                            />
+                          ) : (
+                            <div className="product-circle-img" style={{ background: '#faf9f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <FileImageOutlined style={{ color: '#c2bcae', fontSize: '32px' }} />
+                            </div>
+                          )}
+
+                          {/* Float upload overlay */}
+                          <Upload
+                            accept="image/*"
+                            showUploadList={false}
+                            beforeUpload={(file) => {
+                              handleImageUpload(prod.id, file);
+                              return false;
+                            }}
+                          >
+                            <Button
+                              shape="circle"
+                              icon={imageLoadingMap[prod.id] ? <LoadingOutlined /> : <UploadOutlined />}
+                              size="small"
+                              style={{ position: 'absolute', bottom: 4, right: 4, background: '#ffffff', border: '1px solid #cbd5e1', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                              disabled={imageLoadingMap[prod.id]}
+                            />
+                          </Upload>
+                        </div>
+
+                        {/* Title and Model */}
+                        <h3 className="product-card-title">{prod.name}</h3>
+                        <div className="product-card-model">{prod.modelNumber}</div>
+
+                        {/* Price Adjuster Widget */}
+                        <div className="adjuster-widget">
+                          <button className="adjuster-btn" onClick={() => handleAdjustPrice(prod, -10)}>-</button>
+                          <span className="adjuster-value">₹ {(prod.basePrice || 0).toFixed(2)}</span>
+                          <button className="adjuster-btn" onClick={() => handleAdjustPrice(prod, 10)}>+</button>
+                        </div>
+
+                        {/* Stock Adjuster Widget */}
+                        <div className="adjuster-widget">
+                          <button className="adjuster-btn" onClick={() => handleAdjustStock(prod, -1)}>-</button>
+                          <span className="adjuster-value">
+                            <span className="status-dot" style={{ background: stockColor }} />
+                            {prod.stock} stock
+                          </span>
+                          <button className="adjuster-btn" onClick={() => handleAdjustStock(prod, 1)}>+</button>
+                        </div>
+
+                        {/* Card Controls */}
+                        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                          <Button size="small" icon={<EditOutlined />} onClick={() => openEditModal(prod)}>
+                            Edit
+                          </Button>
+                          <Popconfirm
+                            title="Remove product from catalog?"
+                            onConfirm={() => handleDelete(prod.id)}
+                            okText="Delete"
+                            cancelText="Cancel"
+                          >
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                          </Popconfirm>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+        </main>
       </div>
 
-      {error && <Alert message="Error" description={error} type="error" showIcon style={{ marginBottom: 16 }} />}
-
-      <Table
-        dataSource={products}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        pagination={{ pageSize: 8 }}
-        size="middle"
-      />
-
-      {/* Create/Edit Modal */}
+      {/* Edit/Create Product Modal */}
       <Modal
-        title={editingProduct ? 'Edit Product' : 'Create Product'}
+        title={editingProduct ? 'Modify Product Details' : 'Add New Product'}
         open={isModalOpen}
         onOk={handleModalSubmit}
         onCancel={() => setIsModalOpen(false)}
-        okText={editingProduct ? 'Update' : 'Create'}
+        className="luxury-modal"
+        okText={editingProduct ? 'Save Changes' : 'Add Product'}
         destroyOnClose
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
@@ -348,89 +403,52 @@ const Products: React.FC = () => {
             label="Product Name"
             rules={[{ required: true, message: 'Please enter product name' }]}
           >
-            <Input placeholder="e.g. Health Faucet Premium" />
+            <Input placeholder="e.g. Premium Brass Mixer Tap" />
           </Form.Item>
+
           <Form.Item
             name="modelNumber"
-            label="Model Number / SKU"
-            rules={[{ required: true, message: 'Please enter model/SKU code' }]}
+            label="Model Number"
+            rules={[{ required: true, message: 'Please enter model number' }]}
           >
-            <Input placeholder="e.g. HF-009" />
+            <Input placeholder="e.g. AQUA-201" style={{ textTransform: 'uppercase' }} />
           </Form.Item>
+
           <Form.Item
             name="categoryId"
             label="Category"
-            rules={[{ required: true, message: 'Please select a category' }]}
+            rules={[{ required: true, message: 'Please select category' }]}
           >
             <Select placeholder="Choose product category">
-              {categories.map(c => (
-                <Option key={c.id} value={c.id}>{c.name}</Option>
+              {categories.map(cat => (
+                <Select.Option key={cat.id} value={cat.id}>{cat.name}</Select.Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item
-            name="basePrice"
-            label="Base Price (Company Reference Price — Hidden from Public)"
-            rules={[{ required: true, message: 'Please enter base price' }]}
-          >
-            <InputNumber
-              style={{ width: '100%' }}
-              min={0.01}
-              precision={2}
-              prefix="₹"
-              placeholder="e.g. 450.00"
-            />
-          </Form.Item>
-          <Form.Item
-            name="stock"
-            label="Initial Stock Quantity"
-            rules={[{ required: true, message: 'Please enter initial stock level' }]}
-            initialValue={0}
-          >
-            <InputNumber style={{ width: '100%' }} min={0} />
-          </Form.Item>
-          <Form.Item name="description" label="Description / Specification">
-            <Input.TextArea rows={3} placeholder="Dimensions, metal material coating description" />
-          </Form.Item>
-        </Form>
-      </Modal>
 
-      {/* Adjust Stock Modal */}
-      <Modal
-        title="Adjust Inventory Levels"
-        open={isStockModalOpen}
-        onOk={handleStockSubmit}
-        onCancel={() => setIsStockModalOpen(false)}
-        destroyOnClose
-      >
-        {stockProduct && (
-          <div style={{ marginBottom: 16 }}>
-            <Text type="secondary">Product: </Text>
-            <Text strong>{stockProduct.name} ({stockProduct.modelNumber})</Text>
-            <br />
-            <Text type="secondary">Current Level: </Text>
-            <Tag color="blue">{stockProduct.stock} units</Tag>
+          <Form.Item name="description" label="Description / Specification">
+            <Input.TextArea rows={2} placeholder="Dimensions, coating finish, connection size, etc." />
+          </Form.Item>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <Form.Item
+              name="basePrice"
+              label="Base Price (₹)"
+              rules={[{ required: true, message: 'Please enter base price' }]}
+              initialValue={100}
+            >
+              <InputNumber style={{ width: '100%' }} min={0.01} precision={2} prefix="₹" />
+            </Form.Item>
+
+            <Form.Item
+              name="stock"
+              label="Initial Stock Level"
+              rules={[{ required: true, message: 'Please enter initial stock level' }]}
+              initialValue={10}
+            >
+              <InputNumber style={{ width: '100%' }} min={0} />
+            </Form.Item>
           </div>
-        )}
-        <Form form={stockForm} layout="vertical">
-          <Form.Item
-            name="operation"
-            label="Adjustment Type"
-            initialValue="add"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              <Option value="add">Add / Deduct (Relative)</Option>
-              <Option value="set">Set Level Directly (Absolute)</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="quantity"
-            label="Quantity (Enter negative number to deduct)"
-            rules={[{ required: true, message: 'Please enter adjustment quantity' }]}
-          >
-            <InputNumber style={{ width: '100%' }} />
-          </Form.Item>
         </Form>
       </Modal>
     </div>
