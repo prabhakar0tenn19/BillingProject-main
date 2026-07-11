@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, Typography, Alert, message } from 'antd';
-import { LockOutlined, UserOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Typography, Alert, message, Checkbox, Popover, Modal } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { setAuth, isAuthenticated } from '../utils/auth';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -48,154 +48,190 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#faf9f6', // AQUA brand cream background
-      padding: '24px',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
+    <div className="login-page-container">
       {/* Decorative luxury gold ambient background blurs */}
       <div style={{
         position: 'absolute',
-        top: '-15%',
+        top: '-10%',
         right: '-10%',
-        width: '450px',
-        height: '450px',
+        width: '500px',
+        height: '500px',
         borderRadius: '50%',
         background: 'rgba(133, 91, 20, 0.04)',
-        filter: 'blur(80px)',
+        filter: 'blur(100px)',
         zIndex: 0
       }} />
       <div style={{
         position: 'absolute',
-        bottom: '-15%',
+        bottom: '-10%',
         left: '-10%',
-        width: '450px',
-        height: '450px',
+        width: '500px',
+        height: '500px',
         borderRadius: '50%',
         background: 'rgba(133, 91, 20, 0.03)',
-        filter: 'blur(80px)',
+        filter: 'blur(100px)',
         zIndex: 0
       }} />
 
-      <Card style={{
-        width: '100%',
-        maxWidth: 420,
-        borderRadius: 16,
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 10px 30px rgba(133, 91, 20, 0.05)',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        zIndex: 1,
-        padding: '16px 8px'
-      }}>
-        {/* Luxury Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{
-            fontSize: '36px',
-            color: '#855b14',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 12
-          }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-            </svg>
+      <div className="login-luxury-card" style={{ zIndex: 1 }}>
+        {/* Left Column: Gold Brand Panel */}
+        <div className="login-brand-panel">
+          {/* Logo block */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '28px', color: '#ffffff', display: 'flex', alignItems: 'center' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" fill="#ffffff" />
+              </svg>
+            </span>
+            <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', fontWeight: 800, letterSpacing: '2px', color: '#ffffff' }}>AQUA</span>
           </div>
-          <Title level={2} style={{ margin: 0, fontFamily: 'serif', letterSpacing: '4px', color: '#1e293b', fontWeight: 600 }}>
-            AQUA
-          </Title>
-          <Text type="secondary" style={{ fontSize: 13, letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginTop: 4 }}>
-            B2B GST Ledger Portal
-          </Text>
+
+          {/* Welcome Message */}
+          <div style={{ margin: '40px 0' }}>
+            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#ffffff', margin: '0 0 16px', fontWeight: 700 }}>
+              Welcome Back
+            </h2>
+            <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '15px', lineHeight: '1.6', margin: 0, fontWeight: 400 }}>
+              Access your Aqua dashboard to manage catalogs, invoices, customers, reports and orders from one place.
+            </p>
+          </div>
+
+          {/* Glass Capsule */}
+          <div className="login-glass-capsule">
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              fontSize: '18px'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2" />
+              </svg>
+            </div>
+            <div style={{ flex: 1, color: 'rgba(255, 255, 255, 0.9)', fontSize: '13px', lineHeight: '1.4', fontWeight: 500 }}>
+              Premium inventory and business management platform.
+            </div>
+          </div>
         </div>
 
-        {error && (
-          <Alert
-            message={error}
-            type="error"
-            showIcon
-            style={{ marginBottom: 24, borderRadius: 8 }}
-          />
-        )}
+        {/* Right Column: Sign In Form Panel */}
+        <div className="login-form-panel">
+          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#1e293b', margin: '0 0 8px', fontWeight: 700 }}>
+            Sign In
+          </h1>
+          <p style={{ color: '#858076', fontSize: '14px', margin: '0 0 32px' }}>
+            Enter your credentials to continue.
+          </p>
 
-        <Form
-          name="login_form"
-          layout="vertical"
-          onFinish={onFinish}
-          requiredMark={false}
-        >
-          <Form.Item
-            name="username"
-            label={<Text style={{ fontSize: 13, fontWeight: 500, color: '#475569' }}>Username</Text>}
-            rules={[{ required: true, message: 'Please enter your username' }]}
-          >
-            <Input
-              prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
-              placeholder="Enter username"
-              size="large"
-              style={{ height: 44, borderRadius: 8 }}
+          {error && (
+            <Alert
+              message={error}
+              type="error"
+              showIcon
+              style={{ marginBottom: 24, borderRadius: 8 }}
             />
-          </Form.Item>
+          )}
 
-          <Form.Item
-            name="password"
-            label={<Text style={{ fontSize: 13, fontWeight: 500, color: '#475569' }}>Password</Text>}
-            rules={[{ required: true, message: 'Please enter your password' }]}
+          <Form
+            name="login_form"
+            layout="vertical"
+            onFinish={onFinish}
+            requiredMark={false}
           >
-            <Input.Password
-              prefix={<LockOutlined style={{ color: '#94a3b8' }} />}
-              placeholder="Enter password"
-              size="large"
-              style={{ height: 44, borderRadius: 8 }}
-            />
-          </Form.Item>
-
-          <Form.Item style={{ marginTop: 28, marginBottom: 16 }}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              size="large"
-              block
-              loading={loading}
-              icon={<ArrowRightOutlined />}
-              style={{
-                height: 46,
-                borderRadius: 8,
-                background: 'var(--primary-color)',
-                borderColor: 'var(--primary-color)',
-                fontWeight: 600,
-                fontSize: 15
-              }}
+            <Form.Item
+              name="username"
+              label={<Text style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>Username</Text>}
+              rules={[{ required: true, message: 'Please enter your username' }]}
             >
-              Sign In to System
-            </Button>
-          </Form.Item>
-        </Form>
+              <Input
+                prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
+                placeholder="Enter username"
+                size="large"
+                style={{ height: 44, borderRadius: 8 }}
+              />
+            </Form.Item>
 
-        {/* Info card for default credentials */}
-        <div style={{
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: 8,
-          padding: '12px 16px',
-          marginTop: 24,
-          fontSize: 12
-        }}>
-          <Text strong style={{ color: '#64748b', display: 'block', marginBottom: 4 }}>Default Credentials:</Text>
-          <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '4px' }}>
-            <Text type="secondary">Username:</Text>
-            <Text strong style={{ color: '#475569' }}>admin</Text>
-            <Text type="secondary">Password:</Text>
-            <Text strong style={{ color: '#475569' }}>Admin@123</Text>
+            <Form.Item
+              name="password"
+              label={<Text style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>Password</Text>}
+              rules={[{ required: true, message: 'Please enter your password' }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined style={{ color: '#94a3b8' }} />}
+                placeholder="Enter password"
+                size="large"
+                style={{ height: 44, borderRadius: 8 }}
+              />
+            </Form.Item>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <Form.Item name="remember" valuePropName="checked" noStyle initialValue={true}>
+                <Checkbox style={{ fontSize: '13px', color: '#64748b' }}>Remember me</Checkbox>
+              </Form.Item>
+              <span
+                style={{ fontSize: '13px', color: '#855b14', fontWeight: 600, cursor: 'pointer' }}
+                onClick={() => Modal.info({
+                  title: 'Reset Password',
+                  content: 'Please contact the system administrator to reset or retrieve your password details.'
+                })}
+              >
+                Forgot Password?
+              </span>
+            </div>
+
+            <Form.Item style={{ marginBottom: '24px' }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                block
+                loading={loading}
+                style={{
+                  height: '46px',
+                  borderRadius: '23px',
+                  background: '#855b14',
+                  borderColor: '#855b14',
+                  fontWeight: 600,
+                  fontSize: '15px'
+                }}
+              >
+                Sign In
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <div style={{ display: 'flex', alignItems: 'center', margin: '0 0 24px' }}>
+            <div style={{ flex: 1, height: '1px', background: '#f1ebd9' }}></div>
+            <div style={{ padding: '0 12px', fontSize: '12px', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '1px' }}>or</div>
+            <div style={{ flex: 1, height: '1px', background: '#f1ebd9' }}></div>
+          </div>
+
+          <div style={{ textAlign: 'center', fontSize: '13px', color: '#64748b' }}>
+            Need access?{' '}
+            <Popover
+              content={
+                <div style={{ padding: '4px' }}>
+                  <Text strong style={{ display: 'block', marginBottom: '4px' }}>System Administrator Support</Text>
+                  <Text type="secondary" style={{ fontSize: '12px', display: 'block', margin: '2px 0' }}>📞 Phone: +91 98765 43210</Text>
+                  <Text type="secondary" style={{ fontSize: '12px', display: 'block', margin: '2px 0' }}>✉️ Email: admin@aquasanitary.com</Text>
+                  <Text type="secondary" style={{ fontSize: '11px', display: 'block', marginTop: '6px', color: '#855b14' }}>Default Admin: admin / Admin@123</Text>
+                </div>
+              }
+              title="Admin Contact Info"
+              trigger="click"
+            >
+              <span style={{ color: '#855b14', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+                Contact Administrator
+              </span>
+            </Popover>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

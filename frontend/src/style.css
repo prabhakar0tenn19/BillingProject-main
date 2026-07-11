@@ -671,3 +671,95 @@ h1, h2, h3, .serif-title {
     margin-bottom: 12px !important;
   }
 }
+
+/* Custom Luxury 2-Column Login layout */
+.login-page-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #faf9f6;
+  padding: 24px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-luxury-card {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 940px;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(133, 91, 20, 0.08);
+  border: 1px solid var(--border-color);
+  min-height: 560px;
+}
+
+.login-brand-panel {
+  width: 42%;
+  background: linear-gradient(135deg, #855b14 0%, #593c0d 100%);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.login-brand-panel::after {
+  content: "";
+  position: absolute;
+  bottom: -40px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") no-repeat center;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+}
+
+.login-glass-capsule {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 16px 20px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.login-form-panel {
+  width: 58%;
+  padding: 48px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (max-width: 840px) {
+  .login-luxury-card {
+    flex-direction: column;
+    max-width: 460px;
+    min-height: auto;
+  }
+  .login-brand-panel {
+    width: 100%;
+    padding: 32px 24px;
+    gap: 24px;
+  }
+  .login-form-panel {
+    width: 100%;
+    padding: 32px 24px;
+  }
+  .login-glass-capsule {
+    margin-top: 16px;
+  }
+}
