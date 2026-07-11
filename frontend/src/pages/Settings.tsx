@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Form, Input, Button, Upload, Divider, Typography, Space, Alert, message, InputNumber, Badge, Radio } from 'antd';
+import { Card, Form, Input, Button, Upload, Divider, Typography, Space, Alert, message, InputNumber, Badge, Radio, Row, Col } from 'antd';
 import { UploadOutlined, LoadingOutlined, FileImageOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import api from '../api';
 
@@ -227,9 +227,10 @@ const Settings: React.FC = () => {
         Configure the official information printed on invoices (legal name, bank details, tax GSTIN, and stamp signature).
       </Paragraph>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 24 }}>
+      <Row gutter={[24, 24]}>
         {/* Settings Form */}
-        <Card title="Company Metadata" style={{ borderRadius: 10 }}>
+        <Col xs={24} lg={14}>
+          <Card title="Company Metadata" style={{ borderRadius: 10 }}>
           <Form form={form} layout="vertical" onFinish={handleSaveSettings}>
             <Form.Item
               name="companyName"
@@ -315,11 +316,13 @@ const Settings: React.FC = () => {
             <Button type="primary" htmlType="submit" size="large" block loading={saving}>
               Save Company Settings
             </Button>
-          </Form>
-        </Card>
+            </Form>
+          </Card>
+        </Col>
 
         {/* Digital Signature Card */}
-        <Card title="Digital Stamp / Signature" style={{ borderRadius: 10 }}>
+        <Col xs={24} lg={10}>
+          <Card title="Digital Stamp / Signature" style={{ borderRadius: 10 }}>
           <Paragraph type="secondary" style={{ fontSize: 13 }}>
             Upload your official company seal or authorized signature. This image is fetched dynamically and embedded inside every generated PDF invoice.
           </Paragraph>
@@ -427,8 +430,9 @@ const Settings: React.FC = () => {
               </div>
             )}
           </div>
-        </Card>
-      </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };
