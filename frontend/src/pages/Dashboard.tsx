@@ -164,7 +164,7 @@ const Dashboard: React.FC = () => {
       {/* Chart Section */}
       <Card title="Sales Growth Chart (GST Billing)" style={{ marginBottom: 24, borderRadius: 10 }}>
         <div style={{ width: '100%', height: 300 }}>
-          <ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
@@ -189,6 +189,7 @@ const Dashboard: React.FC = () => {
           columns={columns}
           rowKey="id"
           pagination={false}
+          scroll={{ x: 'max-content' }}
           size="middle"
         />
       </Card>
