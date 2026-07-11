@@ -21,7 +21,7 @@ interface CustomerLookup {
 
 interface BillReadyProduct {
   productId: string;
-  name: string;
+  productName: string;
   modelNumber: string;
   hsnCode: string;
   effectivePrice: number;
@@ -184,7 +184,7 @@ const NewBill: React.FC = () => {
     const newItem: SelectedItem = {
       key: product.productId,
       productId: product.productId,
-      name: product.name,
+      name: product.productName,
       modelNumber: product.modelNumber,
       hsnCode: product.hsnCode,
       quantity: qty,
@@ -390,7 +390,7 @@ const NewBill: React.FC = () => {
             >
               {customerCatalog.map(p => (
                 <Select.Option key={p.productId} value={p.productId}>
-                  {p.name} ({p.modelNumber}) — ₹{p.effectivePrice.toFixed(2)}{' '}
+                  {p.productName} ({p.modelNumber}) — ₹{p.effectivePrice.toFixed(2)}{' '}
                   {p.hasCustomPrice ? '[Negotiated Rate]' : '[Base Price]'}
                 </Select.Option>
               ))}

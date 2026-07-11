@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Input, Select, Tag, Alert, Typography, message, Popconfirm, Card } from 'antd';
 import { SearchOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import dayjs from 'dayjs';
 
@@ -20,6 +20,7 @@ interface InvoiceListItem {
 }
 
 const Invoices: React.FC = () => {
+  const navigate = useNavigate();
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -149,8 +150,8 @@ const Invoices: React.FC = () => {
       key: 'actions',
       render: (r: InvoiceListItem) => (
         <Space size="middle">
-          <Button icon={<EyeOutlined />} type="link">
-            <Link to={`/invoices/${r.id}`}>View</Link>
+          <Button icon={<EyeOutlined />} type="link" onClick={() => navigate(`/invoices/${r.id}`)}>
+            View
           </Button>
           <Button icon={<DownloadOutlined />} type="link" onClick={() => handleDownloadPdf(r.id, r.invoiceNumber)}>
             PDF

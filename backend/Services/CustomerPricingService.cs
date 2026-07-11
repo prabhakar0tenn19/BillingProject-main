@@ -58,15 +58,14 @@ public class CustomerPricingService : ICustomerPricingService
         );
 
         var update = Builders<CustomerPricing>.Update
-            .Set(p => p.CustomerId,       customerId)
             .Set(p => p.CustomerName,     customer.PartyName)
-            .Set(p => p.ProductId,        request.ProductId)
             .Set(p => p.ProductName,      product.Name)
             .Set(p => p.ModelNumber,      product.ModelNumber)
             .Set(p => p.NegotiatedPrice,  request.NegotiatedPrice)
             .Set(p => p.IsActive,         true)
             .Set(p => p.UpdatedAt,        DateTime.UtcNow)
-            .SetOnInsert(p => p.CustomerId, customerId);  // ensures customerId on insert
+            .SetOnInsert(p => p.CustomerId, customerId)  // ensures customerId on insert
+            .SetOnInsert(p => p.ProductId,  request.ProductId);
 
         var result = await _db.CustomerPricing.FindOneAndUpdateAsync<CustomerPricing, CustomerPricing>(
             p => p.CustomerId == customerId && p.ProductId == request.ProductId,
