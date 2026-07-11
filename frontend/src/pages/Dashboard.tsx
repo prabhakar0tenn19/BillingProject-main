@@ -15,10 +15,11 @@ import { Link } from 'react-router-dom';
 const { Title, Text } = Typography;
 
 interface DashboardSummary {
-  totalSales: number;
-  pendingAmount: number;
-  activeCustomers: number;
-  lowStockCount: number;
+  todaySales: number;
+  monthSales: number;
+  totalPendingAmount: number;
+  totalCustomers: number;
+  totalProducts: number;
 }
 
 interface MonthlySale {
@@ -121,8 +122,8 @@ const Dashboard: React.FC = () => {
       <div className="metrics-grid">
         <div className="metric-card">
           <div className="metric-info">
-            <h3>TOTAL SALES (WHITE)</h3>
-            <h2>₹{(summary?.totalSales || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h2>
+            <h3>MONTHLY SALES</h3>
+            <h2>₹{(summary?.monthSales || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h2>
           </div>
           <div className="metric-icon-wrapper" style={{ background: '#ecfdf5', color: '#10b981' }}>
             <DollarCircleOutlined />
@@ -131,8 +132,8 @@ const Dashboard: React.FC = () => {
 
         <div className="metric-card">
           <div className="metric-info">
-            <h3>PENDING PAYMENTS</h3>
-            <h2>₹{(summary?.pendingAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h2>
+            <h3>PENDING PAYMENTS Ledger</h3>
+            <h2>₹{(summary?.totalPendingAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h2>
           </div>
           <div className="metric-icon-wrapper" style={{ background: '#fffbeb', color: '#f59e0b' }}>
             <ClockCircleOutlined />
@@ -141,8 +142,8 @@ const Dashboard: React.FC = () => {
 
         <div className="metric-card">
           <div className="metric-info">
-            <h3>ACTIVE PARTIES</h3>
-            <h2>{summary?.activeCustomers || 0}</h2>
+            <h3>ACTIVE PARTIES (Customers)</h3>
+            <h2>{summary?.totalCustomers || 0}</h2>
           </div>
           <div className="metric-icon-wrapper" style={{ background: '#eff6ff', color: '#3b82f6' }}>
             <TeamOutlined />
@@ -151,8 +152,8 @@ const Dashboard: React.FC = () => {
 
         <div className="metric-card">
           <div className="metric-info">
-            <h3>LOW STOCK PRODUCTS</h3>
-            <h2>{summary?.lowStockCount || 0}</h2>
+            <h3>CATALOG PRODUCTS</h3>
+            <h2>{summary?.totalProducts || 0}</h2>
           </div>
           <div className="metric-icon-wrapper" style={{ background: '#fef2f2', color: '#ef4444' }}>
             <WarningOutlined />

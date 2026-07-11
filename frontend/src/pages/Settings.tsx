@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Form, Input, Button, Upload, Divider, Typography, Space, Alert, message, InputNumber, Badge } from 'antd';
-import { UploadOutlined, LoadingOutlined, FileImageOutlined, CheckCircleOutlined, DeleteOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, Form, Input, Button, Upload, Divider, Typography, Space, Alert, message, InputNumber, Badge, Radio } from 'antd';
+import { UploadOutlined, LoadingOutlined, FileImageOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import api from '../api';
 
 const { Title, Paragraph, Text } = Typography;
@@ -27,6 +27,11 @@ const Settings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [form] = Form.useForm();
+
+  // Signature drawing states
+  const [signatureMethod, setSignatureMethod] = useState<'upload' | 'draw'>('upload');
+  const [isDrawing, setIsDrawing] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const fetchSettings = async () => {
     try {
@@ -108,6 +113,103 @@ const Settings: React.FC = () => {
     } finally {
       setUploading(false);
     }
+  };
+
+  // ─── Drawing Pad Handlers ──────────────────────────────────────────────────
+  
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#0f172a'; // dark blue signature ink
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  // Touch Support for Tablets/Mobiles
+  const startDrawingTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const drawTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const saveDrawnSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        message.error('Canvas is empty or drawing failed!');
+        return;
+      }
+      const file = new File([blob], 'drawn-signature.png', { type: 'image/png' });
+      await handleSignatureUpload(file);
+    }, 'image/png');
   };
 
   if (loading) {
@@ -222,7 +324,7 @@ const Settings: React.FC = () => {
             Upload your official company seal or authorized signature. This image is fetched dynamically and embedded inside every generated PDF invoice.
           </Paragraph>
 
-          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+          <div style={{ textAlign: 'center', padding: '10px 0' }}>
             {settings?.signatureCloudinaryUrl ? (
               <div style={{ background: '#f8fafc', padding: 16, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16 }}>
                 <img
@@ -241,29 +343,89 @@ const Settings: React.FC = () => {
               </div>
             )}
 
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Upload
-                accept="image/*"
-                showUploadList={false}
-                beforeUpload={handleSignatureUpload}
+            <div style={{ marginBottom: 20 }}>
+              <Radio.Group
+                value={signatureMethod}
+                onChange={(e) => setSignatureMethod(e.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+                style={{ width: '100%' }}
               >
-                <Button icon={uploading ? <LoadingOutlined /> : <UploadOutlined />} type="dashed" block disabled={uploading}>
-                  {settings?.signatureCloudinaryUrl ? 'Replace Stamp Image' : 'Upload Stamp Image'}
-                </Button>
-              </Upload>
+                <Radio.Button value="upload" style={{ width: '50%' }}>Upload File</Radio.Button>
+                <Radio.Button value="draw" style={{ width: '50%' }}>Draw Sign</Radio.Button>
+              </Radio.Group>
+            </div>
 
-              {settings?.signatureCloudinaryUrl && (
+            {signatureMethod === 'upload' ? (
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <Upload
+                  accept="image/*"
+                  showUploadList={false}
+                  beforeUpload={handleSignatureUpload}
+                >
+                  <Button icon={uploading ? <LoadingOutlined /> : <UploadOutlined />} type="dashed" block disabled={uploading}>
+                    {settings?.signatureCloudinaryUrl ? 'Replace Stamp Image' : 'Upload Stamp Image'}
+                  </Button>
+                </Upload>
+
+                {settings?.signatureCloudinaryUrl && (
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={handleSignatureDelete}
+                    loading={uploading}
+                    block
+                  >
+                    Remove Signature Stamp
+                  </Button>
+                )}
+              </Space>
+            ) : (
+              <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={{ fontSize: '12px' }} type="secondary" strong>Draw your signature below:</Text>
+                  <Button size="small" onClick={clearCanvas}>Clear</Button>
+                </div>
+                <div style={{ background: '#ffffff', borderRadius: 6, border: '1px solid #cbd5e1', overflow: 'hidden', height: 140 }}>
+                  <canvas
+                    ref={canvasRef}
+                    width={300}
+                    height={140}
+                    style={{ cursor: 'crosshair', display: 'block', width: '100%', height: '100%' }}
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={stopDrawing}
+                    onMouseLeave={stopDrawing}
+                    onTouchStart={startDrawingTouch}
+                    onTouchMove={drawTouch}
+                    onTouchEnd={stopDrawing}
+                  />
+                </div>
                 <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={handleSignatureDelete}
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={saveDrawnSignature}
                   loading={uploading}
+                  style={{ marginTop: 12 }}
                   block
                 >
-                  Remove Signature Stamp
+                  Save & Upload Signature
                 </Button>
-              )}
-            </Space>
+
+                {settings?.signatureCloudinaryUrl && (
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={handleSignatureDelete}
+                    loading={uploading}
+                    style={{ marginTop: 8 }}
+                    block
+                  >
+                    Remove Signature
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </Card>
       </div>

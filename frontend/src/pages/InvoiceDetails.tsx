@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Card, Button, Space, Tag, Alert, Spin, Typography, Divider, Table, Modal, Form, Select, DatePicker, message } from 'antd';
 import {
   ArrowLeftOutlined, DownloadOutlined, PrinterOutlined,
-  CheckCircleOutlined, InfoCircleOutlined, WalletOutlined, RollbackOutlined
+  CheckCircleOutlined, InfoCircleOutlined, WalletOutlined, RollbackOutlined, EditOutlined
 } from '@ant-design/icons';
 import api from '../api';
 import dayjs from 'dayjs';
@@ -118,7 +118,7 @@ const InvoiceDetails: React.FC = () => {
         paidAt: values.paidAt ? values.paidAt.toISOString() : new Date().toISOString()
       };
 
-      const res = await api.post(`/payments/${invoice.id}/pay`, payload);
+      const res = await api.patch(`/invoices/${invoice.id}/mark-paid`, payload);
       if (res.success) {
         message.success('Payment recorded successfully');
         setIsPayModalOpen(false);
@@ -134,7 +134,7 @@ const InvoiceDetails: React.FC = () => {
   const handleMarkAsPending = async () => {
     if (!invoice) return;
     try {
-      const res = await api.post(`/payments/${invoice.id}/unpay`, {});
+      const res = await api.patch(`/invoices/${invoice.id}/mark-pending`, {});
       if (res.success) {
         message.success('Invoice marked as pending');
         fetchInvoiceDetails();
@@ -236,9 +236,14 @@ const InvoiceDetails: React.FC = () => {
         </Button>
         <Space size="middle" wrap>
           {invoice.status === 'pending' && (
-            <Button type="primary" icon={<WalletOutlined />} onClick={() => setIsPayModalOpen(true)} size="large">
-              Record Payment
-            </Button>
+            <>
+              <Button type="primary" icon={<WalletOutlined />} onClick={() => setIsPayModalOpen(true)} size="large">
+                Record Payment
+              </Button>
+              <Button icon={<EditOutlined />} size="large">
+                <Link to={`/edit-invoice/${invoice.id}`}>Edit Invoice</Link>
+              </Button>
+            </>
           )}
           {invoice.status === 'paid' && (
             <Button icon={<RollbackOutlined />} danger onClick={handleMarkAsPending} size="large">

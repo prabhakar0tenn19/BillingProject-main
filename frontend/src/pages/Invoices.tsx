@@ -45,8 +45,8 @@ const Invoices: React.FC = () => {
 
       const res = await api.get('/invoices', { params });
       if (res.success) {
-        setInvoices(res.data.items);
-        setTotal(res.data.totalCount);
+        setInvoices(res.data.data);
+        setTotal(res.data.total);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load invoices catalog');

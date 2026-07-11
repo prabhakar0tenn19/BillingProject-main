@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Steps, Card, Button, Form, Select, Table, InputNumber, Space,
-  Divider, DatePicker, Input, Alert, message, Typography
+  Divider, DatePicker, Input, Alert, message, Typography, Spin
 } from 'antd';
 import {
   UserOutlined, ShoppingCartOutlined, FileDoneOutlined,
-  PlusOutlined, DeleteOutlined, CreditCardOutlined
+  PlusOutlined, DeleteOutlined, CreditCardOutlined, LoadingOutlined
 } from '@ant-design/icons';
 import api from '../api';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
 interface CustomerLookup {
   id: string;
@@ -45,6 +44,7 @@ interface SelectedItem {
 }
 
 const NewBill: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [customers, setCustomers] = useState<CustomerLookup[]>([]);
@@ -57,12 +57,16 @@ const NewBill: React.FC = () => {
   // Loaders
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
+  const [loadingInvoice, setLoadingInvoice] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Forms
   const [partyForm] = Form.useForm();
   const [metaForm] = Form.useForm();
 
+  const isEditMode = !!id;
+
+  // Load all customers initially
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
@@ -84,6 +88,67 @@ const NewBill: React.FC = () => {
     fetchCustomers();
   }, []);
 
+  // Load invoice detail if in Edit Mode
+  useEffect(() => {
+    const loadInvoiceForEditing = async () => {
+      if (!id) return;
+      try {
+        setLoadingInvoice(true);
+        const res = await api.get(`/invoices/${id}`);
+        if (res.success) {
+          const invoice = res.data;
+          
+          if (invoice.status !== 'pending') {
+            message.error('Only pending invoices can be edited!');
+            navigate(`/invoices/${id}`);
+            return;
+          }
+
+          // 1. Set Selected Customer and fetch Catalog
+          setSelectedCustomerId(invoice.customerId);
+          partyForm.setFieldsValue({ customerId: invoice.customerId });
+          
+          // Fetch catalog for this customer
+          setLoadingCatalog(true);
+          const catalogRes = await api.get(`/customers/${invoice.customerId}/pricing/bill-ready`);
+          if (catalogRes.success) {
+            setCustomerCatalog(catalogRes.data);
+          }
+          setLoadingCatalog(false);
+
+          // 2. Set Selected Items
+          const items = invoice.items.map((item: any) => ({
+            key: item.productId,
+            productId: item.productId,
+            name: item.productName,
+            modelNumber: item.modelNumber,
+            hsnCode: item.hsnCode,
+            quantity: item.quantity,
+            rate: item.rate,
+            subTotal: item.subTotal,
+            gstRate: item.gstRate,
+            gstAmount: item.gstAmount,
+            lineTotal: item.lineTotal
+          }));
+          setSelectedItems(items);
+
+          // 3. Pre-fill meta info form
+          metaForm.setFieldsValue({
+            invoiceDate: dayjs(invoice.invoiceDate),
+            dueDate: invoice.dueDate ? dayjs(invoice.dueDate) : null,
+            remarks: invoice.remarks
+          });
+        }
+      } catch (err: any) {
+        message.error('Failed to load invoice details: ' + err.message);
+      } finally {
+        setLoadingInvoice(false);
+      }
+    };
+
+    loadInvoiceForEditing();
+  }, [id]);
+
   const handleCustomerChange = async (customerId: string) => {
     setSelectedCustomerId(customerId);
     setSelectedItems([]); // reset items if customer changes
@@ -104,16 +169,15 @@ const NewBill: React.FC = () => {
     const product = customerCatalog.find(p => p.productId === productId);
     if (!product) return;
 
-    // Check if item already added
     if (selectedItems.some(item => item.productId === productId)) {
-      message.warning('Product already added to line items. Adjust quantity instead.');
+      message.warning('Product already added. Adjust quantity instead.');
       return;
     }
 
     const rate = product.effectivePrice;
     const qty = 1;
     const sub = rate * qty;
-    const gstRate = 5.0; // Fixed 5% GST for Sanitaryware business
+    const gstRate = 5.0; // Fixed 5% GST
     const gstAmt = Math.round(sub * gstRate) / 100;
     const total = sub + gstAmt;
 
@@ -192,7 +256,7 @@ const NewBill: React.FC = () => {
       });
     } else if (currentStep === 1) {
       if (selectedItems.length === 0) {
-        message.error('Please add at least one product to the bill');
+        message.error('Please add at least one product');
         return;
       }
       setCurrentStep(2);
@@ -220,22 +284,36 @@ const NewBill: React.FC = () => {
         }))
       };
 
-      const res = await api.post('/invoices', payload);
+      let res;
+      if (isEditMode) {
+        res = await api.put(`/invoices/${id}`, payload);
+      } else {
+        res = await api.post('/invoices', payload);
+      }
+
       if (res.success) {
-        message.success('Invoice created successfully!');
-        navigate(`/invoices/${res.data.id}`);
+        message.success(isEditMode ? 'Invoice updated successfully!' : 'Invoice generated successfully!');
+        navigate(`/invoices/${isEditMode ? id : res.data.id}`);
       }
     } catch (err: any) {
-      message.error(err.message || 'Failed to submit invoice');
+      message.error(err.message || 'Failed to process invoice request');
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (loadingInvoice) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '350px' }}>
+        <Spin size="large" tip="Loading invoice data for editing..." />
+      </div>
+    );
+  }
+
   return (
     <div className="wizard-container">
       <Title level={3} style={{ marginBottom: 24, textAlign: 'center' }}>
-        Create B2B GST Invoice (White Ledger)
+        {isEditMode ? `Modify Pending Invoice (${id})` : 'Create B2B GST Invoice (White Ledger)'}
       </Title>
 
       <Steps
@@ -264,21 +342,22 @@ const NewBill: React.FC = () => {
                 placeholder="Type to search party name..."
                 onChange={handleCustomerChange}
                 size="large"
+                disabled={isEditMode} // Cannot change customer of a generated invoice (for snapshot safety)
               >
                 {customers.map(c => (
-                  <Option key={c.id} value={c.id}>
+                  <Select.Option key={c.id} value={c.id}>
                     {c.partyName} {c.gstin ? `[GSTIN: ${c.gstin}]` : '[Unregistered]'}
-                  </Option>
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>
           </Form>
 
-          {selectedCustomerId && (
+          {isEditMode && (
             <Alert
-              message="Client Catalog Loaded"
-              description={`Custom pricing overrides mapped automatically. Falling back to default base price for other catalog items.`}
-              type="success"
+              message="Client Lock Enabled"
+              description="To protect historical records and snapshots, the billing party cannot be changed during editing. If you selected the wrong customer, please cancel this invoice and create a new one."
+              type="info"
               showIcon
               style={{ marginTop: 16 }}
             />
@@ -295,7 +374,6 @@ const NewBill: React.FC = () => {
       {/* Step 2: Line Items */}
       {currentStep === 1 && (
         <Card title="Step 2: Populate Invoice Line Items" style={{ borderRadius: 10 }}>
-          {/* Add product selector */}
           <div style={{ marginBottom: 24 }}>
             <Text type="secondary">Quick Add Item from Catalog: </Text>
             <Select
@@ -404,7 +482,6 @@ const NewBill: React.FC = () => {
 
           <Divider />
 
-          {/* Totals Box */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', textAlign: 'right' }}>
             <Space direction="vertical" size="small">
               <div>
@@ -426,7 +503,7 @@ const NewBill: React.FC = () => {
           </div>
 
           <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
-            <Button size="large" onClick={prevStep}>
+            <Button size="large" onClick={prevStep} disabled={isEditMode}>
               Back: Edit Party
             </Button>
             <Button type="primary" size="large" onClick={nextStep} disabled={selectedItems.length === 0}>
@@ -460,7 +537,6 @@ const NewBill: React.FC = () => {
 
           <Divider />
 
-          {/* Quick summary check */}
           <div style={{ background: '#f8fafc', padding: 16, borderRadius: 8, marginBottom: 24 }}>
             <Title level={5} style={{ margin: 0, marginBottom: 8 }}>Invoicing Summary</Title>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -482,7 +558,7 @@ const NewBill: React.FC = () => {
               onClick={handleSubmitInvoice}
               loading={submitting}
             >
-              Generate Bill & Create PDF
+              {isEditMode ? 'Save & Update Invoice' : 'Generate Bill & Create PDF'}
             </Button>
           </div>
         </Card>
