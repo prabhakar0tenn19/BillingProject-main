@@ -219,6 +219,7 @@ const Reports: React.FC = () => {
                   rowKey="customerId"
                   pagination={{ pageSize: 5 }}
                   size="small"
+                  scroll={{ x: 'max-content' }}
                   columns={[
                     { title: 'Party Name', dataIndex: 'partyName', key: 'name' },
                     { title: 'Invoices', dataIndex: 'invoiceCount', key: 'count', align: 'center' },
@@ -236,6 +237,7 @@ const Reports: React.FC = () => {
                   rowKey="productId"
                   pagination={{ pageSize: 5 }}
                   size="small"
+                  scroll={{ x: 'max-content' }}
                   columns={[
                     { title: 'Product Model', key: 'name', render: (r) => `${r.productName} (${r.modelNumber})` },
                     { title: 'Qty Sold', dataIndex: 'totalQuantitySold', key: 'qty', align: 'center' },

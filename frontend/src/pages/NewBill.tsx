@@ -401,6 +401,7 @@ const NewBill: React.FC = () => {
             dataSource={selectedItems}
             rowKey="productId"
             pagination={false}
+            scroll={{ x: 'max-content' }}
             columns={[
               {
                 title: 'Product Info',

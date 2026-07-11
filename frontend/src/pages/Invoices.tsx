@@ -229,6 +229,7 @@ const Invoices: React.FC = () => {
             setPageSize(ps);
           },
         }}
+        scroll={{ x: 'max-content' }}
         size="middle"
       />
     </div>

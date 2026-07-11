@@ -166,6 +166,7 @@ const Categories: React.FC = () => {
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: 'max-content' }}
         size="middle"
       />
 
