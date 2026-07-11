@@ -435,6 +435,81 @@ h1, h2, h3, .serif-title {
   border-radius: var(--radius-md) !important;
 }
 
+/* Bottom Navigation Bar for Mobile */
+.bottom-nav {
+  display: none;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  text-decoration: none;
+  width: 20%;
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+.bottom-nav-item.active {
+  color: var(--primary-color) !important;
+  font-weight: 600;
+}
+
+.mobile-action-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1001;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
+  }
+  
+  .desktop-actions-only {
+    display: none !important;
+  }
+  
+  .mobile-action-only {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+  }
+  
+  /* Add padding at bottom of main page so content doesn't get covered by sticky bottom bar */
+  .page-container {
+    padding-bottom: 88px !important;
+  }
+  
+  /* Hide standard horizontal links from header */
+  .header-nav .nav-links {
+    display: none !important;
+  }
+  
+  /* Refine header behavior to stay on one row */
+  .header-nav {
+    height: 64px !important;
+    padding: 0 16px !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+}
+
 /* Print Specific Styles */
 @media print {
   body * {

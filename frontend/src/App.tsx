@@ -85,7 +85,8 @@ const App: React.FC = () => {
           </Link>
         </nav>
 
-        <Space size="large">
+        {/* Desktop actions: Clock & Create Order */}
+        <Space size="large" className="desktop-actions-only">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ClockCircleOutlined style={{ color: '#858076' }} />
             <Text type="secondary" style={{ fontSize: 13, fontWeight: 500 }}>
@@ -101,6 +102,15 @@ const App: React.FC = () => {
             Create Order
           </Button>
         </Space>
+
+        {/* Mobile Header action: Simple circular plus button */}
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<PlusOutlined />}
+          onClick={() => navigate('/new-bill')}
+          className="mobile-action-only"
+        />
       </header>
 
       {/* Main Content Area */}
@@ -119,10 +129,34 @@ const App: React.FC = () => {
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
-        <Layout.Footer className="no-print" style={{ textAlign: 'center', color: '#858076', padding: '24px 24px', background: '#faf9f6', borderTop: '1px solid #f1ebd9' }}>
+        <Layout.Footer className="no-print" style={{ textAlign: 'center', color: '#858076', padding: '24px 24px 80px', background: '#faf9f6', borderTop: '1px solid #f1ebd9' }}>
           AQUA Sanitaryware Manufacturing &copy; {dayjs().format('YYYY')} — Secure GST B2B Ledger
         </Layout.Footer>
       </Content>
+
+      {/* Bottom Sticky Navigation Bar for Mobile Viewports */}
+      <div className="bottom-nav no-print">
+        <Link to="/" className={`bottom-nav-item ${isActive('/') ? 'active' : ''}`}>
+          <DashboardOutlined style={{ fontSize: '20px' }} />
+          <span style={{ fontSize: '10px', marginTop: '2px' }}>Home</span>
+        </Link>
+        <Link to="/products" className={`bottom-nav-item ${isActive('/products') ? 'active' : ''}`}>
+          <ShoppingOutlined style={{ fontSize: '20px' }} />
+          <span style={{ fontSize: '10px', marginTop: '2px' }}>Catalog</span>
+        </Link>
+        <Link to="/invoices" className={`bottom-nav-item ${isActive('/invoices') ? 'active' : ''}`}>
+          <FileTextOutlined style={{ fontSize: '20px' }} />
+          <span style={{ fontSize: '10px', marginTop: '2px' }}>Invoices</span>
+        </Link>
+        <Link to="/parties" className={`bottom-nav-item ${isActive('/parties') ? 'active' : ''}`}>
+          <TeamOutlined style={{ fontSize: '20px' }} />
+          <span style={{ fontSize: '10px', marginTop: '2px' }}>Buyers</span>
+        </Link>
+        <Link to="/settings" className={`bottom-nav-item ${isActive('/settings') ? 'active' : ''}`}>
+          <SettingOutlined style={{ fontSize: '20px' }} />
+          <span style={{ fontSize: '10px', marginTop: '2px' }}>Settings</span>
+        </Link>
+      </div>
     </Layout>
   );
 };
