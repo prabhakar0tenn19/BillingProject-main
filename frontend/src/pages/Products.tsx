@@ -250,6 +250,25 @@ const Products: React.FC = () => {
       {error && <Alert message="Error" description={error} type="error" showIcon style={{ marginBottom: 24 }} />}
 
       <div className="catalog-layout">
+        {/* Mobile Dropdown Category Select */}
+        <div className="mobile-category-select-container">
+          <div style={{ marginBottom: '6px', fontSize: '11px', fontWeight: 700, color: '#858076', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+            Select Category
+          </div>
+          <Select
+            value={selectedCategoryId}
+            onChange={(val) => setSelectedCategoryId(val)}
+            style={{ width: '100%', marginBottom: '24px' }}
+            size="large"
+          >
+            {categories.map(cat => (
+              <Select.Option key={cat.id} value={cat.id}>
+                {cat.name}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
         {/* Left Column: Categories Sidebar */}
         <aside className="category-sidebar">
           <h4 className="sidebar-title">Categories</h4>
