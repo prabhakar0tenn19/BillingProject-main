@@ -162,6 +162,9 @@ h1, h2, h3, .serif-title {
   
   .category-sidebar {
     padding: 16px !important;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
   }
   
   .category-sidebar-items-wrapper {
@@ -172,6 +175,7 @@ h1, h2, h3, .serif-title {
     padding-bottom: 4px;
     /* Hide scrollbars but keep swipeable function */
     scrollbar-width: none; /* Firefox */
+    width: 100%;
   }
   
   .category-sidebar-items-wrapper::-webkit-scrollbar {
@@ -186,6 +190,12 @@ h1, h2, h3, .serif-title {
   
   .sidebar-title {
     margin-bottom: 10px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
