@@ -1,0 +1,20 @@
+# .NET Core ignore files
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Node.js / React ignore files
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Editor / OS ignore files
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
