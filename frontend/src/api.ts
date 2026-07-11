@@ -11,6 +11,10 @@ const api = axios.create({
 // Response interceptor to automatically extract response wrapper
 api.interceptors.response.use(
   (response) => {
+    // If the response data is a binary Blob, return it directly to avoid wrapping
+    if (response.data instanceof Blob) {
+      return response.data;
+    }
     // If response follows the envelope structure, return the inner data
     if (response.data && response.data.success !== undefined) {
       return response.data; // returns { success, data, message }
