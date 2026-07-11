@@ -345,7 +345,7 @@ const InvoiceDetails: React.FC = () => {
           {/* Left panel: Bank Details and Total in Words */}
           <div>
             {invoice.companySnapshot.bankName && (
-              <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
+              <div className="invoice-bank-panel">
                 <Text strong style={{ display: 'block', marginBottom: 4 }}>BANK PAYMENT DETAILS</Text>
                 <div className="invoice-bank-grid">
                   <Text type="secondary">Bank Name: </Text> <Text strong>{invoice.companySnapshot.bankName}</Text>
@@ -389,7 +389,7 @@ const InvoiceDetails: React.FC = () => {
             </div>
 
             {/* Official Stamp / Signature Section */}
-            <div style={{ marginTop: 32, display: 'inline-block', textAlign: 'center' }}>
+            <div className="invoice-signature-box">
               <Text type="secondary" style={{ display: 'block', fontSize: 11, marginBottom: 8 }}>
                 For {invoice.companySnapshot.companyName}
               </Text>

@@ -54,6 +54,14 @@ const NewBill: React.FC = () => {
   // Line items state
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // Loaders
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
@@ -363,7 +371,7 @@ const NewBill: React.FC = () => {
             />
           )}
 
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+          <div className="wizard-flex-actions" style={{ justifyContent: 'flex-end' }}>
             <Button type="primary" size="large" onClick={nextStep} disabled={!selectedCustomerId}>
               Next: Add Items
             </Button>
@@ -402,6 +410,7 @@ const NewBill: React.FC = () => {
             rowKey="productId"
             pagination={false}
             scroll={{ x: 'max-content' }}
+            size={isMobile ? 'small' : 'middle'}
             columns={[
               {
                 title: 'Product Info',
@@ -419,11 +428,12 @@ const NewBill: React.FC = () => {
                 title: 'Qty',
                 dataIndex: 'quantity',
                 key: 'qty',
-                width: 100,
+                width: 90,
                 render: (qty: number, r: SelectedItem) => (
                   <InputNumber
                     min={1}
                     value={qty}
+                    style={{ width: '100%', minWidth: '60px' }}
                     onChange={(val) => handleQtyChange(r.productId, val || 1)}
                   />
                 ),
@@ -432,12 +442,13 @@ const NewBill: React.FC = () => {
                 title: 'Rate (₹)',
                 dataIndex: 'rate',
                 key: 'rate',
-                width: 130,
+                width: 120,
                 render: (rate: number, r: SelectedItem) => (
                   <InputNumber
                     min={0.01}
                     precision={2}
                     value={rate}
+                    style={{ width: '100%', minWidth: '80px' }}
                     onChange={(val) => handleRateOverride(r.productId, val || 0.01)}
                   />
                 ),
@@ -503,7 +514,7 @@ const NewBill: React.FC = () => {
             </Space>
           </div>
 
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
+          <div className="wizard-flex-actions">
             <Button size="large" onClick={prevStep} disabled={isEditMode}>
               Back: Edit Party
             </Button>
