@@ -76,7 +76,7 @@ BillingProject-main/          ← workspace root
 Swagger UI: `http://localhost:5000/swagger`
 
 ## Build Status
-| File / Directory | Status |
+| File | Status |
 |---|---|
 | BillingSystem.csproj | ✅ Done |
 | appsettings.json | ✅ Done |
@@ -89,12 +89,11 @@ Swagger UI: `http://localhost:5000/swagger`
 | Controllers/* | ✅ Done (Enhanced with Product Images) |
 | Program.cs | ✅ Done |
 | Infrastructure/DataSeeder.cs | ✅ Done |
-| frontend/ | ✅ Done (Fully built, compiled & integrated) |
 
-## What's Next (Deployment)
-1. Push the final frontend modifications to GitHub
-2. Deploy the React App on Netlify, Vercel, or Render Static Site pointing to `frontend/dist/`
-3. Enjoy your fully automated B2B Sanitaryware billing software!
+## What's Next (Frontend)
+1. Configure Vite React frontend options
+2. Build pages: Dashboard, Parties, Products, Categories, New Bill (3-step wizard), Invoices, Reports, Settings
+3. Integrate Ant Design, Axios, React Router
 
 ## Known Issues / Watch Out For
 - QuestPDF requires `QuestPDF.Settings.License = LicenseType.Community;` before first PDF generation (set in Program.cs)
@@ -103,5 +102,4 @@ Swagger UI: `http://localhost:5000/swagger`
 - CORS is configured to allow localhost:5173 (Vite default) and localhost:3000
 
 ## Last Updated
-2026-07-11 — Full stack completed. Backend deployed on Render; React frontend compiled and tested.
-
+2026-07-11 — Backend completed, verified compiled and seeded. Ready for frontend.

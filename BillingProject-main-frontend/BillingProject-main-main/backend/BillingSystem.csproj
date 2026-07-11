@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>BillingSystem</RootNamespace>
+    <AssemblyName>BillingSystem</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MongoDB official .NET driver -->
+    <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+
+    <!-- Cloudinary SDK for digital signature image storage -->
+    <PackageReference Include="CloudinaryDotNet" Version="1.27.0" />
+
+    <!-- QuestPDF for server-side GST invoice PDF generation -->
+    <PackageReference Include="QuestPDF" Version="2024.10.4" />
+
+    <!-- Swagger/OpenAPI UI for testing all endpoints -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+</Project>
