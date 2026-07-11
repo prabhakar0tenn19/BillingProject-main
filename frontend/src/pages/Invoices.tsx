@@ -176,7 +176,7 @@ const Invoices: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: 20 }}>
+      <div className="page-title-row">
         <div style={{ flex: 1 }}>
           <Title level={3} style={{ margin: 0 }}>Invoices History</Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>

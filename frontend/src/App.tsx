@@ -180,7 +180,7 @@ const App: React.FC = () => {
                 borderColor: 'var(--primary-color)'
               }}
             >
-              + Invoice
+              Invoice
             </Button>
             <Button
               type="default"
@@ -211,34 +211,10 @@ const App: React.FC = () => {
             <Route path="*" element={<Dashboard />} />
           </Routes>
         </div>
-        <Layout.Footer className="no-print" style={{ textAlign: 'center', color: '#858076', padding: '24px 24px 80px', background: '#faf9f6', borderTop: '1px solid #f1ebd9' }}>
+        <Layout.Footer className="no-print" style={{ textAlign: 'center', color: '#858076', padding: '24px', background: '#faf9f6', borderTop: '1px solid #f1ebd9' }}>
           AQUA Sanitaryware Manufacturing &copy; {dayjs().format('YYYY')} — Secure GST B2B Ledger
         </Layout.Footer>
       </Content>
-
-      {/* Bottom Sticky Navigation Bar for Mobile Viewports */}
-      <div className="bottom-nav no-print">
-        <Link to="/" className={`bottom-nav-item ${isActive('/') ? 'active' : ''}`}>
-          <DashboardOutlined style={{ fontSize: '20px' }} />
-          <span style={{ fontSize: '10px', marginTop: '2px' }}>Home</span>
-        </Link>
-        <Link to="/products" className={`bottom-nav-item ${isActive('/products') ? 'active' : ''}`}>
-          <ShoppingOutlined style={{ fontSize: '20px' }} />
-          <span style={{ fontSize: '10px', marginTop: '2px' }}>Catalog</span>
-        </Link>
-        <Link to="/invoices" className={`bottom-nav-item ${isActive('/invoices') ? 'active' : ''}`}>
-          <FileTextOutlined style={{ fontSize: '20px' }} />
-          <span style={{ fontSize: '10px', marginTop: '2px' }}>Invoices</span>
-        </Link>
-        <Link to="/parties" className={`bottom-nav-item ${isActive('/parties') ? 'active' : ''}`}>
-          <TeamOutlined style={{ fontSize: '20px' }} />
-          <span style={{ fontSize: '10px', marginTop: '2px' }}>Buyers</span>
-        </Link>
-        <Link to="/settings" className={`bottom-nav-item ${isActive('/settings') ? 'active' : ''}`}>
-          <SettingOutlined style={{ fontSize: '20px' }} />
-          <span style={{ fontSize: '10px', marginTop: '2px' }}>Settings</span>
-        </Link>
-      </div>
 
       {/* Side Slide-out Drawer Navigation for Mobile Devices */}
       <Drawer
