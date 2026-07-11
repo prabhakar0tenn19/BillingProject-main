@@ -116,7 +116,7 @@ h1, h2, h3, .serif-title {
 }
 
 /* Responsive Header */
-@media (max-width: 992px) {
+@media (max-width: 768px) {
   .header-nav {
     height: auto;
     padding: 16px 20px;
@@ -380,15 +380,9 @@ h1, h2, h3, .serif-title {
 
 /* Ant Design overrides */
 .ant-btn-primary {
-  background: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
   border-radius: 20px !important;
   font-weight: 500 !important;
   box-shadow: none !important;
-}
-.ant-btn-primary:hover {
-  background: var(--primary-hover) !important;
-  border-color: var(--primary-hover) !important;
 }
 
 .ant-btn {
@@ -397,10 +391,6 @@ h1, h2, h3, .serif-title {
 
 .ant-input, .ant-input-number, .ant-select-selector {
   border-radius: var(--radius-md) !important;
-  border-color: var(--border-color) !important;
-}
-.ant-input:hover, .ant-input-number:hover, .ant-select-selector:hover {
-  border-color: var(--primary-color) !important;
 }
 
 /* Print Specific Styles */
