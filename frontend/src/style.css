@@ -161,10 +161,14 @@ h1, h2, h3, .serif-title {
   }
   
   .category-sidebar {
-    padding: 16px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible !important;
     box-sizing: border-box;
+    margin-bottom: 12px;
   }
   
   .category-sidebar-items-wrapper {
@@ -172,10 +176,11 @@ h1, h2, h3, .serif-title {
     flex-direction: row;
     gap: 8px;
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: 8px;
     /* Hide scrollbars but keep swipeable function */
     scrollbar-width: none; /* Firefox */
     width: 100%;
+    -webkit-overflow-scrolling: touch;
   }
   
   .category-sidebar-items-wrapper::-webkit-scrollbar {
@@ -186,10 +191,14 @@ h1, h2, h3, .serif-title {
     margin-bottom: 0 !important;
     white-space: nowrap;
     padding: 8px 16px !important;
+    flex-shrink: 0 !important; /* Prevent text from shrinking/clipping */
+    background: #ffffff;
+    border: 1px solid var(--border-color);
   }
   
   .sidebar-title {
     margin-bottom: 10px !important;
+    padding-left: 0 !important;
   }
 }
 

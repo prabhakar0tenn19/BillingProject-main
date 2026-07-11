@@ -47,6 +47,14 @@ const Reports: React.FC = () => {
   const [productSales, setProductSales] = useState<ProductSales[]>([]);
   const [gstSummary, setGstSummary] = useState<GstReport | null>(null);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const fetchReportData = async () => {
     try {
       setLoading(true);
@@ -84,26 +92,65 @@ const Reports: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
+      <div className="page-title-row">
         <div style={{ flex: 1 }}>
           <Title level={3} style={{ margin: 0 }}>Business Analytics & Tax Reports</Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>
             Generate white ledger reports. Extract GSTR summaries, client business volume, and top inventory items.
           </Paragraph>
         </div>
-        <Space>
-          <RangePicker
-            value={dates}
-            onChange={(val) => {
-              if (val && val[0] && val[1]) setDates([val[0], val[1]]);
-            }}
-            format="DD MMM YYYY"
-            size="large"
-          />
-          <Button type="primary" icon={<SearchOutlined />} onClick={handleApplyRange} size="large">
-            Generate Report
-          </Button>
-        </Space>
+        
+        {isMobile ? (
+          <Space direction="vertical" style={{ width: '100%', marginTop: '12px' }} size="small">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
+              <div>
+                <Text type="secondary" style={{ fontSize: '11px', display: 'block', marginBottom: '2px' }}>From Date</Text>
+                <DatePicker
+                  value={dates[0]}
+                  onChange={(val) => {
+                    if (val) setDates([val, dates[1]]);
+                  }}
+                  format="DD MMM YYYY"
+                  style={{ width: '100%' }}
+                />
+              </div>
+              <div>
+                <Text type="secondary" style={{ fontSize: '11px', display: 'block', marginBottom: '2px' }}>To Date</Text>
+                <DatePicker
+                  value={dates[1]}
+                  onChange={(val) => {
+                    if (val) setDates([dates[0], val]);
+                  }}
+                  format="DD MMM YYYY"
+                  style={{ width: '100%' }}
+                />
+              </div>
+            </div>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleApplyRange}
+              block
+              size="large"
+            >
+              Generate Report
+            </Button>
+          </Space>
+        ) : (
+          <Space wrap>
+            <RangePicker
+              value={dates}
+              onChange={(val) => {
+                if (val && val[0] && val[1]) setDates([val[0], val[1]]);
+              }}
+              format="DD MMM YYYY"
+              size="large"
+            />
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleApplyRange} size="large">
+              Generate Report
+            </Button>
+          </Space>
+        )}
       </div>
 
       {error && <Alert message="Error" description={error} type="error" showIcon style={{ marginBottom: 24 }} />}
@@ -117,8 +164,8 @@ const Reports: React.FC = () => {
           {/* Tax summary metrics */}
           {gstSummary && (
             <Card style={{ marginBottom: 24, borderRadius: 10, border: '1px solid #e2e8f0' }}>
-              <Row gutter={16}>
-                <Col span={6}>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12} lg={6}>
                   <Statistic
                     title="Total Taxable Revenue (Net)"
                     value={gstSummary.taxableAmount}
@@ -127,7 +174,7 @@ const Reports: React.FC = () => {
                     valueStyle={{ color: '#0f172a' }}
                   />
                 </Col>
-                <Col span={6}>
+                <Col xs={24} sm={12} lg={6}>
                   <Statistic
                     title="Total GST Collected (5%)"
                     value={gstSummary.totalGst}
@@ -136,7 +183,7 @@ const Reports: React.FC = () => {
                     valueStyle={{ color: '#10b981' }}
                   />
                 </Col>
-                <Col span={6}>
+                <Col xs={24} sm={12} lg={6}>
                   <Statistic
                     title="CGST Share (2.5%)"
                     value={gstSummary.cgstCollected}
@@ -145,7 +192,7 @@ const Reports: React.FC = () => {
                     valueStyle={{ color: '#3b82f6' }}
                   />
                 </Col>
-                <Col span={6}>
+                <Col xs={24} sm={12} lg={6}>
                   <Statistic
                     title="SGST Share (2.5%)"
                     value={gstSummary.sgstCollected}
