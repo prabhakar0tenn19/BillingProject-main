@@ -301,6 +301,7 @@ h1, h2, h3, .serif-title {
 }
 
 .metric-info h2 {
+  font-family: 'Outfit', sans-serif !important;
   font-size: 24px;
   color: var(--text-main);
   margin: 0;

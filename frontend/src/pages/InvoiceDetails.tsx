@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, Button, Space, Tag, Alert, Spin, Typography, Divider, Table, Modal, Form, Select, DatePicker, message } from 'antd';
 import {
   ArrowLeftOutlined, DownloadOutlined, PrinterOutlined,
@@ -58,6 +58,7 @@ interface InvoiceDetail {
 const InvoiceDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { search } = useLocation();
   
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,6 +87,15 @@ const InvoiceDetails: React.FC = () => {
   useEffect(() => {
     if (id) fetchInvoiceDetails();
   }, [id]);
+
+  useEffect(() => {
+    if (!loading && invoice && new URLSearchParams(search).get('print') === 'true') {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, invoice, search]);
 
   const handleDownloadPdf = async () => {
     if (!invoice) return;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Input, Select, Tag, Alert, Typography, message, Popconfirm, Card } from 'antd';
-import { SearchOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined, DownloadOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import dayjs from 'dayjs';
@@ -152,6 +152,9 @@ const Invoices: React.FC = () => {
         <Space size="middle">
           <Button icon={<EyeOutlined />} type="link" onClick={() => navigate(`/invoices/${r.id}`)}>
             View
+          </Button>
+          <Button icon={<PrinterOutlined />} type="link" onClick={() => navigate(`/invoices/${r.id}?print=true`)}>
+            Print
           </Button>
           <Button icon={<DownloadOutlined />} type="link" onClick={() => handleDownloadPdf(r.id, r.invoiceNumber)}>
             PDF
