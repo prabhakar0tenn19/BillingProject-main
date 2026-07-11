@@ -19,15 +19,15 @@ interface ProductSales {
   productId: string;
   productName: string;
   modelNumber: string;
-  totalSales: number;
-  quantitySold: number;
+  totalRevenue: number;
+  totalQuantitySold: number;
 }
 
 interface GstReport {
-  totalTaxable: number;
+  taxableAmount: number;
   totalGst: number;
-  cgst: number;
-  sgst: number;
+  cgstCollected: number;
+  sgstCollected: number;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF19A3'];
@@ -52,15 +52,16 @@ const Reports: React.FC = () => {
       setLoading(true);
       setError(null);
 
+      // Backend expects 'from' and 'to' query parameters
       const params = {
-        startDate: dates[0].startOf('day').toISOString(),
-        endDate: dates[1].endOf('day').toISOString()
+        from: dates[0].startOf('day').toISOString(),
+        to: dates[1].endOf('day').toISOString()
       };
 
       const [custRes, prodRes, gstRes] = await Promise.all([
         api.get('/reports/customer-sales', { params }),
         api.get('/reports/product-sales', { params }),
-        api.get('/reports/gst', { params })
+        api.get('/reports/gst-summary', { params }) // Corrected endpoint from /reports/gst to /reports/gst-summary
       ]);
 
       if (custRes.success) setCustomerSales(custRes.data);
@@ -83,11 +84,11 @@ const Reports: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
         <div style={{ flex: 1 }}>
           <Title level={3} style={{ margin: 0 }}>Business Analytics & Tax Reports</Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>
-            Generate white ledger ledger reports. Extract GSTR summaries, client business volume, and top inventory items.
+            Generate white ledger reports. Extract GSTR summaries, client business volume, and top inventory items.
           </Paragraph>
         </div>
         <Space>
@@ -120,7 +121,7 @@ const Reports: React.FC = () => {
                 <Col span={6}>
                   <Statistic
                     title="Total Taxable Revenue (Net)"
-                    value={gstSummary.totalTaxable}
+                    value={gstSummary.taxableAmount}
                     precision={2}
                     prefix="₹"
                     valueStyle={{ color: '#0f172a' }}
@@ -138,7 +139,7 @@ const Reports: React.FC = () => {
                 <Col span={6}>
                   <Statistic
                     title="CGST Share (2.5%)"
-                    value={gstSummary.cgst}
+                    value={gstSummary.cgstCollected}
                     precision={2}
                     prefix="₹"
                     valueStyle={{ color: '#3b82f6' }}
@@ -147,7 +148,7 @@ const Reports: React.FC = () => {
                 <Col span={6}>
                   <Statistic
                     title="SGST Share (2.5%)"
-                    value={gstSummary.sgst}
+                    value={gstSummary.sgstCollected}
                     precision={2}
                     prefix="₹"
                     valueStyle={{ color: '#3b82f6' }}
@@ -191,7 +192,7 @@ const Reports: React.FC = () => {
                           label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
                           outerRadius={80}
                           fill="#8884d8"
-                          dataKey="totalSales"
+                          dataKey="totalRevenue"
                           nameKey="productName"
                         >
                           {productSales.slice(0, 5).map((entry, index) => (
@@ -237,8 +238,8 @@ const Reports: React.FC = () => {
                   size="small"
                   columns={[
                     { title: 'Product Model', key: 'name', render: (r) => `${r.productName} (${r.modelNumber})` },
-                    { title: 'Qty Sold', dataIndex: 'quantitySold', key: 'qty', align: 'center' },
-                    { title: 'Total Revenue', dataIndex: 'totalSales', key: 'sales', align: 'right', render: (val) => `₹${val.toFixed(2)}` },
+                    { title: 'Qty Sold', dataIndex: 'totalQuantitySold', key: 'qty', align: 'center' },
+                    { title: 'Total Revenue', dataIndex: 'totalRevenue', key: 'sales', align: 'right', render: (val) => `₹${val.toFixed(2)}` },
                   ]}
                 />
               </Card>
