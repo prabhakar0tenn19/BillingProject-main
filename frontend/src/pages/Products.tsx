@@ -269,7 +269,7 @@ const Products: React.FC = () => {
         {/* Right Column: Main Products Catalog */}
         <main>
           {/* Main Title Section */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
+          <div className="page-title-row" style={{ alignItems: 'flex-end', marginBottom: 32 }}>
             <div>
               <h1 style={{ margin: 0, fontSize: '38px', lineHeight: 1 }}>{activeCategoryName}</h1>
               <Text style={{ color: '#855b14', fontWeight: 600, fontSize: '14px', marginTop: 8, display: 'block' }}>

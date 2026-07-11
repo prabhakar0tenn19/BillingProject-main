@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Button, Space, Typography, message } from 'antd';
+import { Layout, Button, Space, Typography, Drawer, message } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -9,7 +9,10 @@ import {
   SettingOutlined,
   ClockCircleOutlined,
   PlusOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  MenuOutlined,
+  AppstoreOutlined,
+  BarChartOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -33,6 +36,7 @@ const { Text } = Typography;
 
 const App: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(dayjs().format('DD MMM YYYY, hh:mm:ss A'));
+  const [drawerVisible, setDrawerVisible] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -78,14 +82,27 @@ const App: React.FC = () => {
     <Layout style={{ minHeight: '100vh', background: '#faf9f6' }}>
       {/* AQUA Top Navigation Header */}
       <header className="header-nav no-print">
-        <div className="logo-container" onClick={() => navigate('/')}>
-          {/* Gold building/water drop icon */}
-          <span style={{ fontSize: '24px', color: '#855b14', display: 'flex', alignItems: 'center' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-            </svg>
-          </span>
-          <span className="logo-text">AQUA</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Hamburger Menu Toggle on Mobile */}
+          {authenticated && (
+            <Button
+              type="text"
+              icon={<MenuOutlined style={{ fontSize: '20px', color: '#855b14' }} />}
+              onClick={() => setDrawerVisible(true)}
+              className="mobile-drawer-toggle"
+              style={{ padding: 0, height: '40px', width: '40px', display: 'none' }}
+            />
+          )}
+
+          <div className="logo-container" onClick={() => navigate('/')}>
+            {/* Gold building/water drop icon */}
+            <span style={{ fontSize: '24px', color: '#855b14', display: 'flex', alignItems: 'center' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+              </svg>
+            </span>
+            <span className="logo-text">AQUA</span>
+          </div>
         </div>
 
         <nav className="nav-links">
@@ -147,22 +164,31 @@ const App: React.FC = () => {
           )}
         </Space>
 
-        {/* Mobile Header action: plus and logout buttons */}
+        {/* Mobile Header actions: + Create Bill and logout buttons */}
         {authenticated && (
-          <Space className="mobile-action-only" size="middle">
+          <Space className="mobile-action-only" size="small">
             <Button
               type="primary"
-              shape="circle"
               icon={<PlusOutlined />}
               onClick={() => navigate('/new-bill')}
-            />
+              style={{
+                height: '36px',
+                padding: '0 12px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: 'var(--primary-color)',
+                borderColor: 'var(--primary-color)'
+              }}
+            >
+              + Invoice
+            </Button>
             <Button
               type="default"
               shape="circle"
               danger
               icon={<LogoutOutlined />}
               onClick={handleLogout}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '36px', width: '36px' }}
             />
           </Space>
         )}
@@ -213,6 +239,63 @@ const App: React.FC = () => {
           <span style={{ fontSize: '10px', marginTop: '2px' }}>Settings</span>
         </Link>
       </div>
+
+      {/* Side Slide-out Drawer Navigation for Mobile Devices */}
+      <Drawer
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '20px', color: '#855b14', display: 'flex', alignItems: 'center' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+              </svg>
+            </span>
+            <span style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '2px', color: '#1e293b' }}>AQUA</span>
+          </div>
+        }
+        placement="left"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={260}
+        bodyStyle={{ padding: '8px 0', display: 'flex', flexDirection: 'column' }}
+      >
+        <div style={{ flex: 1 }}>
+          <Link to="/" className={`drawer-menu-item ${isActive('/') ? 'active' : ''}`} onClick={() => setDrawerVisible(false)}>
+            <DashboardOutlined /> <span>Dashboard</span>
+          </Link>
+          <Link to="/products" className={`drawer-menu-item ${isActive('/products') ? 'active' : ''}`} onClick={() => setDrawerVisible(false)}>
+            <ShoppingOutlined /> <span>Catalog</span>
+          </Link>
+          <Link to="/invoices" className={`drawer-menu-item ${isActive('/invoices') ? 'active' : ''}`} onClick={() => setDrawerVisible(false)}>
+            <FileTextOutlined /> <span>Invoices</span>
+          </Link>
+          <Link to="/parties" className={`drawer-menu-item ${isActive('/parties') ? 'active' : ''}`} onClick={() => setDrawerVisible(false)}>
+            <TeamOutlined /> <span>Buyers</span>
+          </Link>
+          <Link to="/categories" className={`drawer-menu-item ${isActive('/categories') ? 'active' : ''}`} onClick={() => setDrawerVisible(false)}>
+            <AppstoreOutlined /> <span>Categories</span>
+          </Link>
+          <Link to="/reports" className={`drawer-menu-item ${isActive('/reports') ? 'active' : ''}`} onClick={() => setDrawerVisible(false)}>
+            <BarChartOutlined /> <span>Reports</span>
+          </Link>
+          <Link to="/settings" className={`drawer-menu-item ${isActive('/settings') ? 'active' : ''}`} onClick={() => setDrawerVisible(false)}>
+            <SettingOutlined /> <span>Settings</span>
+          </Link>
+        </div>
+        <div style={{ padding: '16px', borderTop: '1px solid #e2e8f0' }}>
+          <Button
+            type="primary"
+            danger
+            block
+            icon={<LogoutOutlined />}
+            onClick={() => {
+              setDrawerVisible(false);
+              handleLogout();
+            }}
+          >
+            Log Out
+          </Button>
+        </div>
+      </Drawer>
     </Layout>
   );
 };
