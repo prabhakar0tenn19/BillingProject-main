@@ -253,15 +253,17 @@ const Products: React.FC = () => {
         {/* Left Column: Categories Sidebar */}
         <aside className="category-sidebar">
           <h4 className="sidebar-title">Categories</h4>
-          {categories.map(cat => (
-            <div
-              key={cat.id}
-              className={`category-menu-item ${selectedCategoryId === cat.id ? 'active' : ''}`}
-              onClick={() => setSelectedCategoryId(cat.id)}
-            >
-              <span>{cat.name}</span>
-            </div>
-          ))}
+          <div className="category-sidebar-items-wrapper">
+            {categories.map(cat => (
+              <div
+                key={cat.id}
+                className={`category-menu-item ${selectedCategoryId === cat.id ? 'active' : ''}`}
+                onClick={() => setSelectedCategoryId(cat.id)}
+              >
+                <span>{cat.name}</span>
+              </div>
+            ))}
+          </div>
         </aside>
 
         {/* Right Column: Main Products Catalog */}

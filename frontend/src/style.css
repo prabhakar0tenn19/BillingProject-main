@@ -133,9 +133,11 @@ h1, h2, h3, .serif-title {
 
 /* Main Page Layout Container */
 .page-container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 32px 24px;
+  box-sizing: border-box;
 }
 
 @media (max-width: 576px) {
@@ -152,10 +154,38 @@ h1, h2, h3, .serif-title {
   align-items: start;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .catalog-layout {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+  
+  .category-sidebar {
+    padding: 16px !important;
+  }
+  
+  .category-sidebar-items-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    /* Hide scrollbars but keep swipeable function */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .category-sidebar-items-wrapper::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+  
+  .category-menu-item {
+    margin-bottom: 0 !important;
+    white-space: nowrap;
+    padding: 8px 16px !important;
+  }
+  
+  .sidebar-title {
+    margin-bottom: 10px !important;
   }
 }
 
