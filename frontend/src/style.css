@@ -621,6 +621,11 @@ h1, h2, h3, .serif-title {
 
 /* Print Specific Styles */
 @media print {
+  @page {
+    size: portrait;
+    margin: 15mm 10mm 15mm 10mm;
+  }
+  
   body * {
     visibility: hidden;
   }
@@ -632,8 +637,37 @@ h1, h2, h3, .serif-title {
     left: 0;
     top: 0;
     width: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
   }
   .no-print {
     display: none !important;
+  }
+  
+  /* Tighten spacing specifically during printing so it fits on a single A4 sheet */
+  .invoice-header-row {
+    margin-bottom: 16px !important;
+  }
+  .invoice-addresses-grid {
+    margin-bottom: 16px !important;
+    gap: 16px !important;
+  }
+  .invoice-addresses-grid > div {
+    padding: 10px !important;
+    background: #f8fafc !important; /* Force background print */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-invoice-container .ant-table-wrapper {
+    margin-bottom: 16px !important;
+  }
+  .invoice-totals-row {
+    gap: 16px !important;
+  }
+  .invoice-calc-grid {
+    margin-bottom: 12px !important;
   }
 }
